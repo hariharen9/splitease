@@ -1,69 +1,104 @@
-# Welcome to your Lovable project
+# Splitease 💸
 
-## Project info
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-4.9.5-blue.svg)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.2.0-blue.svg)](https://react.dev/)
+[![PWA Ready](https://img.shields.io/badge/PWA-Ready-brightgreen.svg)](https://web.dev/progressive-web-apps/)
+[![Firestore](https://img.shields.io/badge/Firestore-Enabled-orange.svg)](https://firebase.google.com/docs/firestore)
 
-**URL**: https://lovable.dev/projects/98f51eda-ceaa-463d-8013-5dc0061c6ff7
+> **Splitease** is a modern, WEB BASED intuitive bill splitting application that takes the hassle out of shared expenses. Whether you're traveling with friends, sharing an apartment, or organizing a group dinner, Splitease makes tracking and settling expenses effortless. Also, 100% FREE
 
-## How can I edit this code?
+![Splitease Demo](./public/og-image.png)
 
-There are several ways of editing your application.
+## ✨ Features
 
-**Use Lovable**
+### Core Functionality
+- **🧮 Smart Expense Calculations** - Real-time balance tracking with support for equal, percentage, and custom amount splits
+- **📊 Intelligent Settlement Suggestions** - Optimized payment plans to minimize the number of transactions needed
+- **👥 Multi-member Support** - Add unlimited members to your expense sessions
+- **🔄 Real-time Syncing** - Changes reflect instantly across all devices
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/98f51eda-ceaa-463d-8013-5dc0061c6ff7) and start prompting.
+### Technical Features
+- **🔥 Firestore Integration** - Cloud-based data persistence with offline support
+- **🔒 PIN-based Session Sharing** - Easily share expense sessions with friends
+- **🎨 Modern UI/UX** - Beautiful interface built with shadcn-ui and Tailwind CSS
+- **⚡ Lightning Fast** - Built with Vite for optimal performance
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🚀 Getting Started
 
-**Use your preferred IDE**
+### Installation
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/splitease.git
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+# Navigate to project directory
+cd splitease
 
-Follow these steps:
+# Install dependencies
+npm install
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Usage
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. **Create a Session** - Start a new expense session and share the PIN with friends
+2. **Add Members** - Add everyone who's part of the expense group
+3. **Track Expenses** - Record expenses as they happen, specifying who paid and who participated
+4. **Settle Up** - Use the suggested settlements to easily square up with everyone
 
-**Use GitHub Codespaces**
+## 💻 Technologies
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Splitease is built with a modern tech stack:
 
-## What technologies are used for this project?
+- **Frontend Framework**: React 18 with TypeScript
+- **Styling**: Tailwind CSS with shadcn-ui components
+- **Build Tool**: Vite for fast development and optimized production builds
+- **Database**: Firebase Firestore (optional)
+- **PWA Support**: Service workers for offline functionality
 
-This project is built with .
+## 🤝 Contributing
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Contributions are welcome! Feel free to open issues or submit pull requests.
 
-## How can I deploy this project?
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-Simply open [Lovable](https://lovable.dev/projects/98f51eda-ceaa-463d-8013-5dc0061c6ff7) and click on Share -> Publish.
+## 📝 License
 
-## I want to use a custom domain - is that possible?
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+## 👨‍💻 Author
+
+Developed with ❤️ by [Hariharen](https://www.linkedin.com/in/hariharen9/)
+
+---
+
+## 🌟 Why Splitease?
+
+### Pain-free Expense Sharing
+
+Tired of the mental math and awkward money conversations? Splitease handles all calculations automatically, showing exactly who owes what to whom.
+
+### Works Anywhere, Anytime
+
+As a Progressive Web App, Splitease works on any device with a browser. Install it on your home screen for quick access, and use it even without an internet connection.
+
+### No Account Required
+
+Unlike other expense-sharing apps, Splitease doesn't require account creation or personal information. Just create a session, share the PIN, and you're ready to go.
+
+### Beautiful Visualization
+
+See your expenses and balances at a glance with our intuitive interface. Color-coded indicators make it easy to understand your financial situation within the group.
+
+---
+
+<p align="center">
+  <b>Splitease - Split bills, not friendships.</b>
+</p>
