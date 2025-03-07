@@ -8,6 +8,8 @@
 
 > **Splitease** is a modern, WEB BASED intuitive bill splitting application that takes the hassle out of shared expenses. Whether you're traveling with friends, sharing an apartment, or organizing a group dinner, Splitease makes tracking and settling expenses effortless. Also, 100% FREE
 
+> Made with AI ( GPT, Deepseek and Trae )
+
 ![Splitease Demo](./public/og-image.png)
 
 ## ✨ Features
