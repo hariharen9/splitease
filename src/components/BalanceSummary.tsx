@@ -50,7 +50,7 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
       <div className="space-y-3">
         {memberBalances.map(({ member, amount }) => (
           <Card 
-            key={member?.id} 
+            key={member?.id || `member-${amount}`} 
             className="glass-panel border-white/10 overflow-hidden"
           >
             <CardContent className="p-4">

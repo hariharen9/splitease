@@ -48,11 +48,14 @@ const SettlementsView: React.FC<SettlementsViewProps> = ({
           const fromMember = getMember(settlement.from);
           const toMember = getMember(settlement.to);
           
+          // Create a unique key based on the settlement properties
+          const key = `${settlement.from}-${settlement.to}-${settlement.amount}`;
+          
           if (!fromMember || !toMember) return null;
           
           return (
             <Card 
-              key={index} 
+              key={key} 
               className="glass-panel border-white/10 overflow-hidden"
             >
               <CardContent className="p-4">

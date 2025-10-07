@@ -1,17 +1,16 @@
-
 import { initializeApp, FirebaseApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
 // Firebase configuration
-// IMPORTANT: Replace these values with your Firebase project configuration
+// Using environment variables from .env file
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY_HERE",
-  authDomain: "YOUR_AUTH_DOMAIN_HERE",
-  projectId: "YOUR_PROJECT_ID_HERE",
-  storageBucket: "YOUR_STORAGE_BUCKET_HERE",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID_HERE",
-  appId: "YOUR_APP_ID_HERE",
-  measurementId: "YOUR_MEASUREMENT_ID_HERE"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 
@@ -31,9 +30,9 @@ export const db = getFirestore(app);
 // Helper to check if Firebase is properly configured
 export const isFirebaseConfigured = () => {
   return (
-    firebaseConfig.apiKey !== "YOUR_API_KEY" && 
-    firebaseConfig.projectId !== "YOUR_PROJECT_ID" && 
-    firebaseConfig.appId !== "YOUR_APP_ID"
+    firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY_HERE" && 
+    firebaseConfig.projectId && firebaseConfig.projectId !== "YOUR_PROJECT_ID_HERE" && 
+    firebaseConfig.appId && firebaseConfig.appId !== "YOUR_APP_ID_HERE"
   );
 };
 

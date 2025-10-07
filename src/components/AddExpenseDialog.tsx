@@ -280,7 +280,6 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
                         render={({ field }) => {
                           return (
                             <FormItem
-                              key={member.id}
                               className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-2 glass-input"
                             >
                               <FormControl>

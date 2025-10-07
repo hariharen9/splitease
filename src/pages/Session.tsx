@@ -277,7 +277,6 @@ const SessionPage = () => {
 
         {/* Tabs */}
         <Tabs
-          key={`tabs-${refreshKey}`}
           value={activeTab}
           onValueChange={setActiveTab}
           className="w-full mb-6"
@@ -289,9 +288,8 @@ const SessionPage = () => {
           </TabsList>
 
           <AnimatePresence mode="wait">
-            <TabsContent value="expenses">
+            <TabsContent value="expenses" key="expenses-tab">
               <motion.div
-                key={`expenses-${refreshKey}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -305,9 +303,8 @@ const SessionPage = () => {
               </motion.div>
             </TabsContent>
 
-            <TabsContent value="balances">
+            <TabsContent value="balances" key="balances-tab">
               <motion.div
-                key={`balances-${refreshKey}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -321,9 +318,8 @@ const SessionPage = () => {
               </motion.div>
             </TabsContent>
 
-            <TabsContent value="settle">
+            <TabsContent value="settle" key="settle-tab">
               <motion.div
-                key={`settle-${refreshKey}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
