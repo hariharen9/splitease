@@ -371,12 +371,13 @@ const SessionPage = () => {
       </main>
 
       {/* Add Expense Button */}
-      <div className="fixed bottom-6 right-6">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2">
         <Button
           onClick={() => setShowAddExpense(true)}
-          className="h-14 w-14 rounded-full bg-gradient-to-r from-gradient-start to-gradient-end shadow-lg hover:opacity-90 transition-opacity"
+          className="h-14 px-6 rounded-xl bg-gradient-to-r from-gradient-start to-gradient-end shadow-lg hover:opacity-90 transition-opacity flex items-center gap-2 text-white"
         >
           <Plus className="h-6 w-6" />
+          <span className="text-lg">Add Expense</span>
         </Button>
       </div>
 

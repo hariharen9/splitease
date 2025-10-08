@@ -201,6 +201,14 @@ export const useAppStore = create<AppState>()(
           name,
           avatarColor: `hsl(${Math.floor(Math.random() * 360)}, 70%, 70%)`
         };
+
+        set((state) => ({
+          sessions: state.sessions.map((s) =>
+            s.id === currentSessionId
+              ? { ...s, members: [...s.members, newMember] }
+              : s
+          ),
+        }));
         
         // Update in Firestore if connected
         if (get().isFirestoreConnected && currentPin) {
@@ -208,48 +216,57 @@ export const useAppStore = create<AppState>()(
             await firestoreService.addMemberToSession(currentPin, newMember);
           } catch (error) {
             console.error("Error adding member in Firestore:", error);
+            // Revert state if firestore update fails
+            set((state) => ({
+              sessions: state.sessions.map((s) =>
+                s.id === currentSessionId
+                  ? { ...s, members: s.members.filter(m => m.id !== newMember.id) }
+                  : s
+              ),
+            }));
           }
         }
-        
-
       },
       
       removeMember: async (id) => {
         const currentSessionId = get().currentSessionId;
         const currentPin = get().currentSessionPin;
-        
+
         if (!currentSessionId) return;
-        
-        // Get the current session to update
+
         const session = get().getCurrentSession();
         if (!session) return;
-        
-        // Create updated session with member removed and expenses updated
-        const updatedSession = {
-          ...session,
-          members: session.members.filter(m => m.id !== id),
-          // Also remove the member from any expenses they're participating in
-          expenses: session.expenses.map(e => ({
-            ...e,
-            participants: e.participants.filter(p => p !== id),
-            // If the payer was removed, set to another participant or empty
-            paidBy: e.paidBy === id 
-              ? (e.participants.find(p => p !== id) || '')
-              : e.paidBy
-          }))
-        };
-        
-        // Update in Firestore if connected
+
+        const isMemberInvolvedInExpenses = session.expenses.some(
+          (expense) => expense.paidBy === id || expense.participants.includes(id)
+        );
+
+        if (isMemberInvolvedInExpenses) {
+          throw new Error("This member is involved in expenses and cannot be removed.");
+        }
+
+        const updatedMembers = session.members.filter((m) => m.id !== id);
+
+        set((state) => ({
+          sessions: state.sessions.map((s) =>
+            s.id === currentSessionId ? { ...s, members: updatedMembers } : s
+          ),
+        }));
+
         if (get().isFirestoreConnected && currentPin) {
           try {
-            await firestoreService.updateSessionMembers(currentPin, updatedSession.members);
-            await firestoreService.updateSessionExpenses(currentPin, updatedSession.expenses);
+            await firestoreService.updateSessionMembers(currentPin, updatedMembers);
           } catch (error) {
             console.error("Error removing member in Firestore:", error);
+            // Revert state if firestore update fails
+            set((state) => ({
+              sessions: state.sessions.map((s) =>
+                s.id === currentSessionId ? { ...s, members: session.members } : s
+              ),
+            }));
+            throw new Error("Failed to remove member from the session.");
           }
         }
-        
-
       },
       
       updateMember: async (id, name) => {
@@ -258,25 +275,32 @@ export const useAppStore = create<AppState>()(
         
         if (!currentSessionId) return;
         
-        // Get the current session to update
         const session = get().getCurrentSession();
         if (!session) return;
         
-        // Create updated members list
         const updatedMembers = session.members.map(m => 
           m.id === id ? { ...m, name } : m
         );
+
+        set((state) => ({
+          sessions: state.sessions.map((s) =>
+            s.id === currentSessionId ? { ...s, members: updatedMembers } : s
+          ),
+        }));
         
-        // Update in Firestore if connected
         if (get().isFirestoreConnected && currentPin) {
           try {
             await firestoreService.updateSessionMembers(currentPin, updatedMembers);
           } catch (error) {
             console.error("Error updating member in Firestore:", error);
+            // Revert state if firestore update fails
+            set((state) => ({
+              sessions: state.sessions.map((s) =>
+                s.id === currentSessionId ? { ...s, members: session.members } : s
+              ),
+            }));
           }
         }
-        
-
       },
       
       addExpense: async (expense) => {

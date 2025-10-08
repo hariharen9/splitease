@@ -56,12 +56,22 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
   };
   
   const handleRemoveMember = (id: string, name: string) => {
+    const session = useAppStore.getState().getCurrentSession();
+    const isMemberInvolvedInExpenses = session?.expenses.some(
+      (expense) => expense.paidBy === id || expense.participants.includes(id)
+    );
+
+    if (isMemberInvolvedInExpenses) {
+      toast.error(`${name} is involved in expenses and cannot be removed.`);
+      return;
+    }
+
     try {
       removeMember(id);
       toast.success(`${name} removed from the group`);
     } catch (error) {
       console.error("Error removing member:", error);
-      toast.error("Failed to remove member");
+      toast.error((error as Error).message || "Failed to remove member");
     }
   };
   
