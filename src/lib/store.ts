@@ -24,6 +24,7 @@ interface AppState {
   syncSessionFromFirestore: (session: Session) => void;
   setCurrentSessionId: (id: string) => void;
   deleteSession: (sessionId: string) => Promise<void>;
+  markSettlementAsCompleted: (settlement: Settlement) => Promise<void>;
   
   // Member actions
   addMember: (name: string) => Promise<void>;
@@ -66,6 +67,7 @@ export const useAppStore = create<AppState>()(
           members: [],
           expenses: [],
           currency: "INR",
+          settlementsCompleted: []
         };
         
         // If connected to Firestore, save there first
@@ -471,6 +473,42 @@ export const useAppStore = create<AppState>()(
         }));
       },
       
+      // Add function to mark settlements as completed
+      markSettlementAsCompleted: async (settlement: Settlement) => {
+        const currentSessionId = get().currentSessionId;
+        const currentPin = get().currentSessionPin;
+        
+        if (!currentSessionId) return;
+        
+        // Get the current session
+        const session = get().getCurrentSession();
+        if (!session) return;
+        
+        // Add to completed settlements
+        const updatedSettlementsCompleted = [
+          ...(session.settlementsCompleted || []),
+          settlement
+        ];
+        
+        // Update in Firestore if connected
+        if (get().isFirestoreConnected && currentPin) {
+          try {
+            await firestoreService.updateSessionSettlements(currentPin, updatedSettlementsCompleted);
+          } catch (error) {
+            console.error("Error marking settlement as completed in Firestore:", error);
+          }
+        }
+        
+        // Always update local state
+        set((state) => ({
+          sessions: state.sessions.map(s => 
+            s.id === currentSessionId
+              ? { ...s, settlementsCompleted: updatedSettlementsCompleted }
+              : s
+          )
+        }));
+      },
+      
       // These calculation functions remain the same as they operate on the local state
       calculateBalances: () => {
         const session = get().getCurrentSession();
@@ -516,6 +554,9 @@ export const useAppStore = create<AppState>()(
       },
       
       calculateSettlements: () => {
+        const session = get().getCurrentSession();
+        if (!session) return [];
+        
         const balances = get().calculateBalances();
         const settlements: Settlement[] = [];
         
@@ -542,11 +583,23 @@ export const useAppStore = create<AppState>()(
           
           const amount = Math.min(debtor.amount, creditor.amount);
           
-          settlements.push({
+          const settlement: Settlement = {
             from: debtor.id,
             to: creditor.id,
             amount: Math.round(amount * 100) / 100 // Round to 2 decimal places
-          });
+          };
+          
+          // Check if this settlement is already completed
+          const isCompleted = (session.settlementsCompleted || []).some(
+            completed => 
+              completed.from === settlement.from && 
+              completed.to === settlement.to && 
+              Math.abs(completed.amount - settlement.amount) < 0.01
+          );
+          
+          if (!isCompleted) {
+            settlements.push(settlement);
+          }
           
           debtor.amount -= amount;
           creditor.amount -= amount;

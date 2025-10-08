@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Settlement, Member } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency, getInitials, getCurrencySymbol } from "@/lib/utils";
 import { ArrowRight, Check, CreditCard } from "lucide-react";
 import { toast } from "sonner";
+import { useAppStore } from "@/lib/store";
 
 interface SettlementsViewProps {
   settlements: Settlement[];
@@ -18,13 +18,21 @@ const SettlementsView: React.FC<SettlementsViewProps> = ({
   members,
   currency
 }) => {
+  const { markSettlementAsCompleted } = useAppStore();
+  
   // Get member by ID
   const getMember = (id: string): Member | undefined => {
     return members.find((member) => member.id === id);
   };
   
-  const handleMarkSettled = () => {
-    toast.success("Marked as settled! This is just a placeholder in this version.");
+  const handleMarkSettled = async (settlement: Settlement) => {
+    try {
+      await markSettlementAsCompleted(settlement);
+      toast.success("Settlement marked as completed!");
+    } catch (error) {
+      console.error("Error marking settlement as completed:", error);
+      toast.error("Failed to mark settlement as completed");
+    }
   };
   
   if (settlements.length === 0) {
@@ -96,7 +104,7 @@ const SettlementsView: React.FC<SettlementsViewProps> = ({
                   <Button 
                     variant="outline" 
                     className="w-full glass-input border-dashed"
-                    onClick={handleMarkSettled}
+                    onClick={() => handleMarkSettled(settlement)}
                   >
                     <Check className="h-4 w-4 mr-2" />
                     Mark as settled

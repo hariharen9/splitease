@@ -28,6 +28,7 @@ export interface Session {
   members: Member[];
   expenses: Expense[];
   currency: string;
+  settlementsCompleted?: Settlement[]; // Track completed settlements
 }
 
 export interface Balance {

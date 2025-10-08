@@ -14,7 +14,7 @@ import {
   writeBatch
 } from "firebase/firestore";
 import { db, isFirebaseConfigured } from "./firebase";
-import { Session, Expense, Member } from "./types";
+import { Session, Expense, Member, Settlement } from "./types";
 import { generateId, generatePin } from "./utils";
 
 const SESSIONS_COLLECTION = "sessions";
@@ -132,6 +132,16 @@ export const updateSessionExpenses = async (pin: string, expenses: Expense[]): P
     await updateDoc(doc(db, SESSIONS_COLLECTION, pin), { expenses });
   } catch (error) {
     console.error("Error updating expenses in session:", error);
+  }
+};
+
+// Add function to update session with completed settlements
+export const updateSessionSettlements = async (pin: string, settlementsCompleted: Settlement[]): Promise<void> => {
+  try {
+    if (!checkFirebaseConfig()) return;
+    await updateDoc(doc(db, SESSIONS_COLLECTION, pin), { settlementsCompleted });
+  } catch (error) {
+    console.error("Error updating settlements in session:", error);
   }
 };
 
