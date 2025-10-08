@@ -71,6 +71,15 @@ export const updateSessionTitle = async (pin: string, title: string): Promise<vo
   }
 };
 
+export const updateSessionCurrency = async (pin: string, currency: string): Promise<void> => {
+  try {
+    if (!checkFirebaseConfig()) return;
+    await updateDoc(doc(db, SESSIONS_COLLECTION, pin), { currency });
+  } catch (error) {
+    console.error("Error updating session currency in Firestore:", error);
+  }
+};
+
 export const addMemberToSession = async (pin: string, member: Member): Promise<void> => {
   try {
     if (!checkFirebaseConfig()) return;

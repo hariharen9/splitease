@@ -29,13 +29,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent } from "@/components/ui/card";
 import { Member, Expense, Settlement } from "@/lib/types";
-import { formatCurrency, getInitials } from "@/lib/utils";
+import { formatCurrency, getInitials, getCurrencySymbol } from "@/lib/utils";
 import ExpenseList from "@/components/ExpenseList";
 import AddExpenseDialog from "@/components/AddExpenseDialog";
 import AddMemberDialog from "@/components/AddMemberDialog";
 import BalanceSummary from "@/components/BalanceSummary";
 import SettlementsView from "@/components/SettlementsView";
 import { subscribeToSession } from "@/lib/firestore";
+import SettingsDialog from "@/components/SettingsDialog";
 
 const SessionPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -43,6 +44,7 @@ const SessionPage = () => {
   const [activeTab, setActiveTab] = useState("expenses");
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const [balances, setBalances] = useState<Record<string, number>>({});
   const [settlements, setSettlements] = useState<Settlement[]>([]);
@@ -166,6 +168,10 @@ const SessionPage = () => {
     setShowAddMember(false);
   }, []);
 
+  const handleSettingsComplete = useCallback(() => {
+    setShowSettings(false);
+  }, []);
+
   // Calculate total expenses
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
@@ -244,7 +250,7 @@ const SessionPage = () => {
                   <Users className="mr-2 h-4 w-4" />
                   Manage Members
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowSettings(true)}>
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
                 </DropdownMenuItem>
@@ -268,7 +274,8 @@ const SessionPage = () => {
               <div className="flex flex-col">
                 <span className="text-muted-foreground text-sm">Total Expenses</span>
                 <span className="text-xl font-semibold mt-1">
-                  {formatCurrency(totalExpenses)}
+                  <span>{getCurrencySymbol(session?.currency)}</span>
+                  {formatCurrency(totalExpenses, session?.currency)}
                 </span>
               </div>
             </CardContent>
@@ -324,6 +331,7 @@ const SessionPage = () => {
                   expenses={expenses}
                   members={members}
                   onAddExpense={() => setShowAddExpense(true)}
+                  currency={session?.currency}
                 />
               </motion.div>
             </TabsContent>
@@ -339,6 +347,7 @@ const SessionPage = () => {
                   balances={balances} 
                   members={members} 
                   totalExpenses={totalExpenses}
+                  currency={session?.currency}
                 />
               </motion.div>
             </TabsContent>
@@ -353,6 +362,7 @@ const SessionPage = () => {
                 <SettlementsView 
                   settlements={settlements} 
                   members={members}
+                  currency={session?.currency}
                 />
               </motion.div>
             </TabsContent>
@@ -391,6 +401,16 @@ const SessionPage = () => {
             onOpenChange={setShowAddMember}
             members={members}
             onComplete={handleAddMemberComplete}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showSettings && (
+          <SettingsDialog
+            key="settings-dialog"
+            open={showSettings}
+            onOpenChange={setShowSettings}
           />
         )}
       </AnimatePresence>

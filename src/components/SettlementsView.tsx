@@ -3,18 +3,20 @@ import React from "react";
 import { Settlement, Member } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { formatCurrency, getInitials } from "@/lib/utils";
+import { formatCurrency, getInitials, getCurrencySymbol } from "@/lib/utils";
 import { ArrowRight, Check, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 
 interface SettlementsViewProps {
   settlements: Settlement[];
   members: Member[];
+  currency: string;
 }
 
 const SettlementsView: React.FC<SettlementsViewProps> = ({
   settlements,
-  members
+  members,
+  currency
 }) => {
   // Get member by ID
   const getMember = (id: string): Member | undefined => {
@@ -74,7 +76,8 @@ const SettlementsView: React.FC<SettlementsViewProps> = ({
                     <div className="flex items-center px-2">
                       <span className="text-muted-foreground mx-1">pays</span>
                       <span className="font-semibold mx-1">
-                        {formatCurrency(settlement.amount)}
+                        <span>{getCurrencySymbol(currency)}</span>
+                        {formatCurrency(settlement.amount, currency)}
                       </span>
                       <ArrowRight className="h-4 w-4 text-muted-foreground mx-1" />
                     </div>

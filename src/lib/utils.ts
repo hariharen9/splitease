@@ -6,10 +6,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number, currency: string = "USD") {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
+export function formatCurrency(amount: number, currency: string = "INR") {
+  return new Intl.NumberFormat("en-IN", {
+    style: "decimal",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(amount);
@@ -65,6 +64,17 @@ export function debounce<T extends (...args: any[]) => any>(
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => fn(...args), delay);
   };
+}
+
+export function getCurrencySymbol(currency: string = "INR") {
+  const symbols: Record<string, string> = {
+    INR: "₹",
+    USD: "$",
+    EUR: "€",
+    GBP: "£",
+    JPY: "¥",
+  };
+  return symbols[currency] || currency;
 }
 
 export function calculatePercentage(amount: number, total: number): string {

@@ -27,6 +27,7 @@ export interface Session {
   createdAt: string; // ISO string
   members: Member[];
   expenses: Expense[];
+  currency: string;
 }
 
 export interface Balance {

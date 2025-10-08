@@ -10,19 +10,21 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
-import { formatCurrency, formatDate, getInitials } from "@/lib/utils";
+import { formatCurrency, formatDate, getInitials, getCurrencySymbol } from "@/lib/utils";
 import { PlusCircle, Receipt } from "lucide-react";
 
 interface ExpenseListProps {
   expenses: Expense[];
   members: Member[];
   onAddExpense: () => void;
+  currency: string;
 }
 
 const ExpenseList: React.FC<ExpenseListProps> = ({ 
   expenses, 
   members, 
-  onAddExpense 
+  onAddExpense,
+  currency
 }) => {
   // Sort expenses by date, newest first
   const sortedExpenses = [...expenses].sort(
@@ -109,7 +111,8 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
                       <div className="flex justify-between mb-2">
                         <h4 className="font-medium">{expense.title}</h4>
                         <span className="font-semibold">
-                          {formatCurrency(expense.amount)}
+                          <span>{getCurrencySymbol(currency)}</span>
+                          {formatCurrency(expense.amount, currency)}
                         </span>
                       </div>
                       

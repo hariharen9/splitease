@@ -18,6 +18,7 @@ interface AppState {
   joinSession: (pin: string) => Promise<Session | null>;
   getCurrentSession: () => Session | null;
   updateSessionTitle: (title: string) => Promise<void>;
+  updateCurrency: (currency: string) => Promise<void>;
   syncSessionFromFirestore: (session: Session) => void;
   setCurrentSessionId: (id: string) => void;
   
@@ -55,7 +56,8 @@ export const useAppStore = create<AppState>()(
           title: title || 'Untitled Session',
           createdAt: new Date().toISOString(),
           members: [],
-          expenses: []
+          expenses: [],
+          currency: "INR",
         };
         
         // If connected to Firestore, save there first
@@ -158,8 +160,34 @@ export const useAppStore = create<AppState>()(
             console.error("Error updating session title in Firestore:", error);
           }
         }
-        
+      },
 
+      updateCurrency: async (currency) => {
+        const currentSession = get().getCurrentSession();
+        const currentPin = get().currentSessionPin;
+        
+        if (!currentSession) return;
+
+        set(state => ({
+          sessions: state.sessions.map(s =>
+            s.id === currentSession.id ? { ...s, currency } : s
+          ),
+        }));
+        
+        // Update in Firestore if connected
+        if (get().isFirestoreConnected && currentPin) {
+          try {
+            await firestoreService.updateSessionCurrency(currentPin, currency);
+          } catch (error) {
+            console.error("Error updating currency in Firestore:", error);
+            // Revert state if firestore update fails
+            set(state => ({
+              sessions: state.sessions.map(s =>
+                s.id === currentSession.id ? { ...s, currency: currentSession.currency } : s
+              ),
+            }));
+          }
+        }
       },
       
       addMember: async (name) => {

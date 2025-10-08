@@ -2,19 +2,21 @@
 import React from "react";
 import { Member } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatCurrency, getInitials } from "@/lib/utils";
+import { formatCurrency, getInitials, getCurrencySymbol } from "@/lib/utils";
 import { ArrowDownRight, ArrowUpRight, Users } from "lucide-react";
 
 interface BalanceSummaryProps {
   balances: Record<string, number>;
   members: Member[];
   totalExpenses: number;
+  currency: string;
 }
 
 const BalanceSummary: React.FC<BalanceSummaryProps> = ({
   balances,
   members,
-  totalExpenses
+  totalExpenses,
+  currency
 }) => {
   // Get member by ID
   const getMember = (id: string): Member | undefined => {
@@ -78,7 +80,8 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
                   <div className="flex items-center">
                     {amount > 0 && <ArrowUpRight className="h-4 w-4 mr-1" />}
                     {amount < 0 && <ArrowDownRight className="h-4 w-4 mr-1" />}
-                    {formatCurrency(Math.abs(amount))}
+                    <span>{getCurrencySymbol(currency)}</span>
+                    {formatCurrency(Math.abs(amount), currency)}
                   </div>
                 </div>
               </div>
