@@ -100,6 +100,10 @@ const SessionPage = () => {
       const unsubscribe = subscribeToSession(sessionPin, (updatedSession) => {
         if (updatedSession) {
           syncSessionFromFirestore(updatedSession);
+        } else {
+          // Session was deleted or no longer exists
+          toast.error("Session no longer exists");
+          navigate("/");
         }
       });
 
@@ -112,7 +116,7 @@ const SessionPage = () => {
     
     // Return a no-op cleanup function if we don't subscribe
     return () => {};
-  }, [sessionId, sessionPin, isFirestoreConnected, syncSessionFromFirestore, navigate]); // Use sessionId and sessionPin instead of session
+  }, [sessionId, sessionPin, isFirestoreConnected, syncSessionFromFirestore, navigate, session]); // Add session to dependencies
 
   const handleCopyPin = () => {
     // Check if clipboard API is available

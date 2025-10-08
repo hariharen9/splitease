@@ -5,6 +5,7 @@ import {
   setDoc, 
   getDoc, 
   updateDoc,
+  deleteDoc,
   query, 
   where, 
   getDocs,
@@ -136,9 +137,15 @@ export const subscribeToSession = (
       (doc) => {
         if (doc.exists()) {
           const sessionData = doc.data() as Session;
-          // Only log and update if there's actually new data
-          console.log("Received session update from Firestore");
-          onUpdate(sessionData);
+          // Check if session is marked as deleted
+          if ('deleted' in sessionData && sessionData.deleted) {
+            console.log("Session is marked as deleted");
+            onUpdate(null);
+          } else {
+            // Only log and update if there's actually new data
+            console.log("Received session update from Firestore");
+            onUpdate(sessionData);
+          }
         } else {
           console.log("Session document doesn't exist in Firestore");
           onUpdate(null);
@@ -162,24 +169,16 @@ export const deleteSessionFromFirestore = async (pin: string): Promise<void> => 
     if (!checkFirebaseConfig()) return;
     
     console.log("Deleting session from Firestore with PIN:", pin);
-    // First, try to mark as deleted
-    try {
-      await updateDoc(doc(db, SESSIONS_COLLECTION, pin), {
-        deleted: true,
-        deletedAt: new Date().toISOString()
-      });
-      console.log("Session marked as deleted in Firestore");
-    } catch (updateError: any) {
-      // If update fails because document doesn't exist, that's fine
-      if (updateError?.code === 'not-found') {
-        console.log("Session document doesn't exist in Firestore, nothing to delete");
-        return;
-      }
-      // If it's another error, re-throw it
-      throw updateError;
+    // Actually delete the document
+    await deleteDoc(doc(db, SESSIONS_COLLECTION, pin));
+    console.log("Session deleted from Firestore");
+  } catch (error: any) {
+    // If it's a "not found" error, that's fine - the document doesn't exist anyway
+    if (error?.code === 'not-found') {
+      console.log("Session document doesn't exist in Firestore, nothing to delete");
+      return;
     }
-  } catch (error) {
-    console.error("Error marking session as deleted in Firestore:", error);
+    console.error("Error deleting session from Firestore:", error);
     throw error;
   }
 };

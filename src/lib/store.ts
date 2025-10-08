@@ -88,6 +88,16 @@ export const useAppStore = create<AppState>()(
             const firestoreSession = await firestoreService.getSessionByPin(pin);
             
             if (firestoreSession) {
+              // Check if session is marked as deleted
+              if ('deleted' in firestoreSession && firestoreSession.deleted) {
+                console.log("Session is marked as deleted in Firestore");
+                // Remove from local storage if it exists
+                set((state) => ({
+                  sessions: state.sessions.filter(s => s.pin !== pin)
+                }));
+                return null;
+              }
+              
               // Check if we already have this session locally
               const existingSession = get().sessions.find(s => s.pin === pin);
               
@@ -108,8 +118,11 @@ export const useAppStore = create<AppState>()(
               
               return firestoreSession;
             }
-          } catch (error) {
-            console.error("Error joining session from Firestore:", error);
+          } catch (error: any) {
+            // If it's a "not found" error, continue to check local storage
+            if (error?.code !== 'not-found') {
+              console.error("Error joining session from Firestore:", error);
+            }
             // Fall back to local storage if Firestore fails
           }
         }
@@ -117,6 +130,16 @@ export const useAppStore = create<AppState>()(
         // Fall back to check local storage
         const localSession = get().sessions.find(s => s.pin === pin);
         if (localSession) {
+          // Check if session is marked as deleted locally
+          if ('deleted' in localSession && localSession.deleted) {
+            console.log("Session is marked as deleted in local storage");
+            // Remove from local storage
+            set((state) => ({
+              sessions: state.sessions.filter(s => s.pin !== pin)
+            }));
+            return null;
+          }
+          
           set({ 
             currentSessionId: localSession.id,
             currentSessionPin: localSession.pin
