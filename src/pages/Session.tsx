@@ -37,6 +37,7 @@ import BalanceSummary from "@/components/BalanceSummary";
 import SettlementsView from "@/components/SettlementsView";
 import { subscribeToSession } from "@/lib/firestore";
 import SettingsDialog from "@/components/SettingsDialog";
+import ActivityTab from "@/components/ActivityTab";
 
 const SessionPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -396,10 +397,11 @@ const SessionPage = () => {
           onValueChange={setActiveTab}
           className="w-full mb-6"
         >
-          <TabsList className="grid grid-cols-3 w-full mb-6">
+          <TabsList className="grid grid-cols-4 w-full mb-6">
             <TabsTrigger value="expenses">Expenses</TabsTrigger>
             <TabsTrigger value="balances">Balances</TabsTrigger>
             <TabsTrigger value="settle">Settle Up</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
 
           <AnimatePresence mode="wait">
@@ -446,6 +448,19 @@ const SessionPage = () => {
                   settlements={settlements} 
                   members={members}
                   currency={session?.currency}
+                />
+              </motion.div>
+            </TabsContent>
+
+            <TabsContent value="activity" key="activity-tab">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ActivityTab 
+                  activities={session?.activities || []}
                 />
               </motion.div>
             </TabsContent>

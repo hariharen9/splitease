@@ -14,7 +14,7 @@ import {
   writeBatch
 } from "firebase/firestore";
 import { db, isFirebaseConfigured } from "./firebase";
-import { Session, Expense, Member, Settlement } from "./types";
+import { Session, Expense, Member, Settlement, Activity } from "./types";
 import { generateId, generatePin } from "./utils";
 
 const SESSIONS_COLLECTION = "sessions";
@@ -204,5 +204,15 @@ export const deleteSessionFromFirestore = async (pin: string): Promise<void> => 
     }
     console.error("Error deleting session from Firestore:", error);
     throw error;
+  }
+};
+
+// Add function to update session with activities
+export const updateSessionActivities = async (pin: string, activities: Activity[]): Promise<void> => {
+  try {
+    if (!checkFirebaseConfig()) return;
+    await updateDoc(doc(db, SESSIONS_COLLECTION, pin), { activities });
+  } catch (error) {
+    console.error("Error updating activities in session:", error);
   }
 };

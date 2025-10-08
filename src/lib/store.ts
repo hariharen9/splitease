@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Session, Expense, Member, Settlement } from './types';
+import { Session, Expense, Member, Settlement, Activity } from './types';
 import { generatePin, generateId } from './utils';
 import * as firestoreService from './firestore';
 
@@ -25,6 +25,7 @@ interface AppState {
   setCurrentSessionId: (id: string) => void;
   deleteSession: (sessionId: string) => Promise<void>;
   markSettlementAsCompleted: (settlement: Settlement) => Promise<void>;
+  addActivity: (activity: Omit<Activity, 'id' | 'timestamp'>) => Promise<void>;
   
   // Member actions
   addMember: (name: string) => Promise<void>;
@@ -67,7 +68,8 @@ export const useAppStore = create<AppState>()(
           members: [],
           expenses: [],
           currency: "INR",
-          settlementsCompleted: []
+          settlementsCompleted: [],
+          activities: [] // Initialize activities array
         };
         
         // If connected to Firestore, save there first
@@ -86,6 +88,17 @@ export const useAppStore = create<AppState>()(
           currentSessionId: newSession.id,
           currentSessionPin: newSession.pin
         }));
+        
+        // Add activity for session creation
+        get().addActivity({
+          type: 'session_created',
+          description: `Session created: ${newSession.title}`,
+          details: {
+            sessionId: newSession.id,
+            sessionTitle: newSession.title,
+            sessionPin: newSession.pin
+          }
+        });
         
         return newSession;
       },
@@ -259,6 +272,16 @@ export const useAppStore = create<AppState>()(
             }));
           }
         }
+        
+        // Add activity for member addition
+        get().addActivity({
+          type: 'member_added',
+          description: `Member added: ${name}`,
+          details: {
+            memberId: newMember.id,
+            memberName: name
+          }
+        });
       },
       
       removeMember: async (id) => {
@@ -279,6 +302,7 @@ export const useAppStore = create<AppState>()(
         }
 
         const updatedMembers = session.members.filter((m) => m.id !== id);
+        const removedMember = session.members.find((m) => m.id === id);
 
         set((state) => ({
           sessions: state.sessions.map((s) =>
@@ -300,6 +324,18 @@ export const useAppStore = create<AppState>()(
             throw new Error("Failed to remove member from the session.");
           }
         }
+        
+        // Add activity for member removal
+        if (removedMember) {
+          get().addActivity({
+            type: 'member_removed',
+            description: `Member removed: ${removedMember.name}`,
+            details: {
+              memberId: removedMember.id,
+              memberName: removedMember.name
+            }
+          });
+        }
       },
       
       updateMember: async (id, name) => {
@@ -311,6 +347,7 @@ export const useAppStore = create<AppState>()(
         const session = get().getCurrentSession();
         if (!session) return;
         
+        const oldMember = session.members.find(m => m.id === id);
         const updatedMembers = session.members.map(m => 
           m.id === id ? { ...m, name } : m
         );
@@ -333,6 +370,19 @@ export const useAppStore = create<AppState>()(
               ),
             }));
           }
+        }
+        
+        // Add activity for member update
+        if (oldMember) {
+          get().addActivity({
+            type: 'member_added',
+            description: `Member updated: ${oldMember.name} → ${name}`,
+            details: {
+              memberId: id,
+              oldName: oldMember.name,
+              newName: name
+            }
+          });
         }
       },
       
@@ -377,6 +427,20 @@ export const useAppStore = create<AppState>()(
           )
         }));
         }
+        
+        // Add activity for expense creation
+        const payer = session.members.find(m => m.id === expense.paidBy);
+        if (payer) {
+          get().addActivity({
+            type: 'expense_added',
+            description: `${payer.name} added expense: ${expense.title}`,
+            details: {
+              expense: newExpense,
+              payerName: payer.name,
+              participantsCount: expense.participants.length
+            }
+          });
+        }
       },
       
       removeExpense: async (id) => {
@@ -388,6 +452,9 @@ export const useAppStore = create<AppState>()(
         // Get the current session to update
         const session = get().getCurrentSession();
         if (!session) return;
+        
+        // Find the expense being removed
+        const expenseToRemove = session.expenses.find(e => e.id === id);
         
         // Create updated expenses list
         const updatedExpenses = session.expenses.filter(e => e.id !== id);
@@ -411,6 +478,21 @@ export const useAppStore = create<AppState>()(
             )
           }));
         }
+        
+        // Add activity for expense removal
+        if (expenseToRemove) {
+          const payer = session.members.find(m => m.id === expenseToRemove.paidBy);
+          if (payer) {
+            get().addActivity({
+              type: 'expense_removed',
+              description: `Expense removed: ${expenseToRemove.title}`,
+              details: {
+                expense: expenseToRemove,
+                payerName: payer.name
+              }
+            });
+          }
+        }
       },
       
       updateExpense: async (id, expenseUpdates) => {
@@ -422,6 +504,9 @@ export const useAppStore = create<AppState>()(
         // Get the current session to update
         const session = get().getCurrentSession();
         if (!session) return;
+        
+        // Find the expense being updated
+        const expenseToUpdate = session.expenses.find(e => e.id === id);
         
         // Create updated expenses list
         const updatedExpenses = session.expenses.map(e => 
@@ -445,6 +530,22 @@ export const useAppStore = create<AppState>()(
               : s
           )
         }));
+        
+        // Add activity for expense update
+        if (expenseToUpdate) {
+          const payer = session.members.find(m => m.id === expenseToUpdate.paidBy);
+          if (payer) {
+            get().addActivity({
+              type: 'expense_removed',
+              description: `Expense updated: ${expenseToUpdate.title}`,
+              details: {
+                oldExpense: expenseToUpdate,
+                newExpense: updatedExpenses.find(e => e.id === id),
+                payerName: payer.name
+              }
+            });
+          }
+        }
       },
       
       // Add delete session function
@@ -462,6 +563,18 @@ export const useAppStore = create<AppState>()(
             }
             // For "not found" errors, we continue to remove from local storage
           }
+        }
+        
+        // Add activity for session deletion
+        if (sessionToDelete) {
+          get().addActivity({
+            type: 'session_updated',
+            description: `Session deleted: ${sessionToDelete.title}`,
+            details: {
+              sessionId: sessionToDelete.id,
+              sessionTitle: sessionToDelete.title
+            }
+          });
         }
         
         // Always update local state
@@ -504,6 +617,66 @@ export const useAppStore = create<AppState>()(
           sessions: state.sessions.map(s => 
             s.id === currentSessionId
               ? { ...s, settlementsCompleted: updatedSettlementsCompleted }
+              : s
+          )
+        }));
+        
+        // Add activity for settlement completion
+        const fromMember = session.members.find(m => m.id === settlement.from);
+        const toMember = session.members.find(m => m.id === settlement.to);
+        if (fromMember && toMember) {
+          get().addActivity({
+            type: 'settlement_completed',
+            description: `${fromMember.name} settled with ${toMember.name}`,
+            details: {
+              from: settlement.from,
+              to: settlement.to,
+              amount: settlement.amount,
+              currency: session.currency
+            }
+          });
+        }
+      },
+      
+      // Add activity function
+      addActivity: async (activity: Omit<Activity, 'id' | 'timestamp'>) => {
+        const currentSessionId = get().currentSessionId;
+        const currentPin = get().currentSessionPin;
+        
+        if (!currentSessionId) return;
+        
+        // Get the current session
+        const session = get().getCurrentSession();
+        if (!session) return;
+        
+        // Create the activity object
+        const newActivity: Activity = {
+          id: generateId(),
+          timestamp: new Date().toISOString(),
+          ...activity
+        };
+        
+        // Update in Firestore if connected
+        if (get().isFirestoreConnected && currentPin) {
+          try {
+            // Get the current activities array
+            const currentActivities = session.activities || [];
+            const updatedActivities = [...currentActivities, newActivity];
+            
+            await firestoreService.updateSessionActivities(currentPin, updatedActivities);
+          } catch (error) {
+            console.error("Error adding activity to session in Firestore:", error);
+          }
+        }
+        
+        // Always update local state
+        set((state) => ({
+          sessions: state.sessions.map(s => 
+            s.id === currentSessionId
+              ? { 
+                  ...s, 
+                  activities: [...(s.activities || []), newActivity] 
+                }
               : s
           )
         }));

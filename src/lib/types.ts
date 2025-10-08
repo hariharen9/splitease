@@ -29,6 +29,7 @@ export interface Session {
   expenses: Expense[];
   currency: string;
   settlementsCompleted?: Settlement[]; // Track completed settlements
+  activities?: Activity[]; // Track session activities
 }
 
 export interface Balance {
@@ -40,4 +41,13 @@ export interface Settlement {
   from: string; // member ID
   to: string; // member ID
   amount: number;
+}
+
+export interface Activity {
+  id: string;
+  type: 'expense_added' | 'expense_removed' | 'member_added' | 'member_removed' | 'settlement_completed' | 'session_created' | 'session_updated';
+  timestamp: string; // ISO string
+  description: string;
+  details: any; // Type-specific details
+  userId?: string; // If we want to track which user performed the action
 }
