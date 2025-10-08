@@ -126,8 +126,10 @@ export const subscribeToSession = (
       doc(db, SESSIONS_COLLECTION, pin),
       (doc) => {
         if (doc.exists()) {
+          const sessionData = doc.data() as Session;
+          // Only log and update if there's actually new data
           console.log("Received session update from Firestore");
-          onUpdate(doc.data() as Session);
+          onUpdate(sessionData);
         } else {
           console.log("Session document doesn't exist in Firestore");
           onUpdate(null);

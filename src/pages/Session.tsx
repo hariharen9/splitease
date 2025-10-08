@@ -43,15 +43,10 @@ const SessionPage = () => {
   const [activeTab, setActiveTab] = useState("expenses");
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
-  const [sessionTitle, setSessionTitle] = useState("");
-  const [sessionPin, setSessionPin] = useState("");
+
   const [balances, setBalances] = useState<Record<string, number>>({});
   const [settlements, setSettlements] = useState<Settlement[]>([]);
-  const [refreshKey, setRefreshKey] = useState(0);
 
-  // Get state and actions from the store
   const {
     getCurrentSession,
     calculateBalances,
@@ -61,51 +56,52 @@ const SessionPage = () => {
     isFirestoreConnected,
   } = useAppStore();
 
-  // Function to refresh data from store
-  const refreshSessionData = useCallback(() => {
-    const session = getCurrentSession();
+  const session = getCurrentSession();
+  
+  // Use session ID as dependency instead of the entire session object
+  const sessionId = session?.id;
+  const sessionPin = session?.pin;
+
+  useEffect(() => {
+    if (session) {
+      const calculatedBalances = calculateBalances();
+      setBalances(calculatedBalances);
+      const calculatedSettlements = calculateSettlements();
+      setSettlements(calculatedSettlements);
+    }
+  }, [sessionId, calculateBalances, calculateSettlements]); // Use sessionId instead of session
+
+  const {
+    expenses = [],
+    members = [],
+    title: sessionTitle = "",
+  } = session || {};
+
+  useEffect(() => {
     if (!session) {
-      toast.error("Session not found");
       navigate("/");
       return;
     }
-    
-    setExpenses(session.expenses);
-    setMembers(session.members);
-    setSessionTitle(session.title);
-    setSessionPin(session.pin);
-    
-    const calculatedBalances = calculateBalances();
-    setBalances(calculatedBalances);
-    
-    const calculatedSettlements = calculateSettlements();
-    setSettlements(calculatedSettlements);
-    
-    // Force a re-render after state updates
-    setRefreshKey(prev => prev + 1);
-  }, [getCurrentSession, calculateBalances, calculateSettlements, navigate]);
 
-  // Set up real-time sync with Firestore
-  useEffect(() => {
-    refreshSessionData();
-    
-    // Only set up Firestore listener if connected
+    // Only subscribe if Firestore is connected and we have a session PIN
     if (isFirestoreConnected && sessionPin) {
+      console.log("Setting up Firestore subscription for PIN:", sessionPin);
       const unsubscribe = subscribeToSession(sessionPin, (updatedSession) => {
         if (updatedSession) {
-          // Sync the updated session to our local store
           syncSessionFromFirestore(updatedSession);
-          // Refresh UI with the latest data
-          refreshSessionData();
         }
       });
-      
-      // Clean up subscription on unmount
+
+      // Clean up subscription on unmount or when dependencies change
       return () => {
+        console.log("Cleaning up Firestore subscription for PIN:", sessionPin);
         unsubscribe();
       };
     }
-  }, [id, refreshSessionData, isFirestoreConnected, sessionPin, syncSessionFromFirestore]);
+    
+    // Return a no-op cleanup function if we don't subscribe
+    return () => {};
+  }, [sessionId, sessionPin, isFirestoreConnected, syncSessionFromFirestore, navigate]); // Use sessionId and sessionPin instead of session
 
   const handleCopyPin = () => {
     // Check if clipboard API is available
@@ -149,7 +145,6 @@ const SessionPage = () => {
     if (newTitle && newTitle.trim() !== "") {
       updateSessionTitle(newTitle.trim())
         .then(() => {
-          setSessionTitle(newTitle.trim());
           toast.success("Session title updated");
         })
         .catch((error) => {
@@ -165,13 +160,11 @@ const SessionPage = () => {
   
   const handleAddExpenseComplete = useCallback(() => {
     setShowAddExpense(false);
-    refreshSessionData();
-  }, [refreshSessionData]);
+  }, []);
   
   const handleAddMemberComplete = useCallback(() => {
     setShowAddMember(false);
-    refreshSessionData();
-  }, [refreshSessionData]);
+  }, []);
 
   // Calculate total expenses
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);

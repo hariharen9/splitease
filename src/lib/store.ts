@@ -159,14 +159,7 @@ export const useAppStore = create<AppState>()(
           }
         }
         
-        // Always update local state
-        set((state) => ({
-          sessions: state.sessions.map(session => 
-            session.id === state.currentSessionId
-              ? { ...session, title }
-              : session
-          )
-        }));
+
       },
       
       addMember: async (name) => {
@@ -190,14 +183,7 @@ export const useAppStore = create<AppState>()(
           }
         }
         
-        // Always update local state
-        // set((state) => ({
-        //   sessions: state.sessions.map(s => 
-        //     s.id === currentSessionId
-        //       ? { ...s, members: [...s.members, newMember] }
-        //       : s
-        //   )
-        // }));
+
       },
       
       removeMember: async (id) => {
@@ -235,12 +221,7 @@ export const useAppStore = create<AppState>()(
           }
         }
         
-        // Always update local state
-        // set((state) => ({
-        //   sessions: state.sessions.map(s => 
-        //     s.id === currentSessionId ? updatedSession : s
-        //   )
-        // }));
+
       },
       
       updateMember: async (id, name) => {
@@ -267,14 +248,7 @@ export const useAppStore = create<AppState>()(
           }
         }
         
-        // Always update local state
-        // set((state) => ({
-        //   sessions: state.sessions.map(s => 
-        //     s.id === currentSessionId
-        //       ? { ...s, members: updatedMembers }
-        //       : s
-        //   )
-        // }));
+
       },
       
       addExpense: async (expense) => {
@@ -308,14 +282,7 @@ export const useAppStore = create<AppState>()(
           }
         }
         
-        // Always update local state
-        set((state) => ({
-          sessions: state.sessions.map(s => 
-            s.id === currentSessionId
-              ? { ...s, expenses: [...s.expenses, newExpense] }
-              : s
-          )
-        }));
+
       },
       
       removeExpense: async (id) => {
@@ -329,25 +296,7 @@ export const useAppStore = create<AppState>()(
         if (!session) return;
         
         // Create updated expenses list
-        const updatedExpenses = session.expenses.filter(e => e.id !== id);
-        
-        // Update in Firestore if connected
-        if (get().isFirestoreConnected && currentPin) {
-          try {
-            await firestoreService.updateSessionExpenses(currentPin, updatedExpenses);
-          } catch (error) {
-            console.error("Error removing expense in Firestore:", error);
-          }
-        }
-        
-        // Always update local state
-        set((state) => ({
-          sessions: state.sessions.map(s => 
-            s.id === currentSessionId
-              ? { ...s, expenses: updatedExpenses }
-              : s
-          )
-        }));
+
       },
       
       updateExpense: async (id, expenseUpdates) => {
@@ -374,14 +323,7 @@ export const useAppStore = create<AppState>()(
           }
         }
         
-        // Always update local state
-        set((state) => ({
-          sessions: state.sessions.map(s => 
-            s.id === currentSessionId
-              ? { ...s, expenses: updatedExpenses }
-              : s
-          )
-        }));
+
       },
       
       // These calculation functions remain the same as they operate on the local state
