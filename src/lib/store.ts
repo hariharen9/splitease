@@ -326,45 +326,45 @@ export const useAppStore = create<AppState>()(
 
       },
       
-      // These calculation functions remain the same as they operate on the local state
       calculateBalances: () => {
         const session = get().getCurrentSession();
         if (!session) return {};
         
-        // Initialize balances for all members
         const balances: Record<string, number> = {};
         session.members.forEach(member => {
           balances[member.id] = 0;
         });
         
-        // Calculate each expense's impact on balances
         session.expenses.forEach(expense => {
           const payer = expense.paidBy;
           const participants = expense.participants;
-          
           if (!payer || participants.length === 0) return;
-          
+
+          const expenseAmount = Math.round(expense.amount * 100);
+          balances[payer] = (balances[payer] * 100 + expenseAmount) / 100;
+
           if (expense.split === 'equal') {
-            const amountPerPerson = expense.amount / participants.length;
-            
-            // The payer gets credit for the full amount
-            balances[payer] += expense.amount;
-            
-            // Each participant owes their share
+            const amountPerPerson = Math.round(expenseAmount / participants.length) / 100;
             participants.forEach(participantId => {
-              balances[participantId] -= amountPerPerson;
+              balances[participantId] = (balances[participantId] * 100 - amountPerPerson * 100) / 100;
             });
-          } else if (expense.split === 'percentage' || expense.split === 'amount') {
-            // For custom splits, we use the provided amounts
-            balances[payer] += expense.amount;
-            
-            if (expense.customSplits) {
-              Object.entries(expense.customSplits).forEach(([memberId, amount]) => {
-                balances[memberId] -= amount;
-              });
-            }
+          } else if (expense.customSplits) {
+            Object.entries(expense.customSplits).forEach(([memberId, splitValue]) => {
+              if (expense.split === 'percentage') {
+                const amountToSubtract = Math.round(expenseAmount * (splitValue / 100)) / 100;
+                balances[memberId] = (balances[memberId] * 100 - amountToSubtract * 100) / 100;
+              } else { // amount
+                const amountToSubtract = Math.round(splitValue * 100) / 100;
+                balances[memberId] = (balances[memberId] * 100 - amountToSubtract * 100) / 100;
+              }
+            });
           }
         });
+
+        // Final rounding to clean up any floating point dust
+        for (const memberId in balances) {
+          balances[memberId] = Math.round(balances[memberId] * 100) / 100;
+        }
         
         return balances;
       },

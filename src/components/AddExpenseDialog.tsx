@@ -1,6 +1,5 @@
-
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import React, { useState, useEffect } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { 
   Dialog, 
   DialogContent, 
@@ -55,6 +54,7 @@ interface FormValues {
   date: Date;
   split: SplitType;
   description?: string;
+  customSplits?: Record<string, number>;
 }
 
 const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
@@ -64,6 +64,7 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
   onComplete
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [customSplitError, setCustomSplitError] = useState<string | null>(null);
   const addExpense = useAppStore((state) => state.addExpense);
   
   const form = useForm<FormValues>({
@@ -74,22 +75,59 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
       participants: members.map(m => m.id),
       date: new Date(),
       split: "equal",
-      description: ""
+      description: "",
+      customSplits: {}
     }
   });
   
+  const splitType = useWatch({ control: form.control, name: "split" });
+  const participants = useWatch({ control: form.control, name: "participants" });
+  const amount = useWatch({ control: form.control, name: "amount" });
+
+  useEffect(() => {
+    // Reset custom splits when split type changes or dialog reopens
+    form.setValue('customSplits', {});
+  }, [splitType, open, form]);
+
+  const handleCustomSplitChange = (memberId: string, value: string) => {
+    const numValue = parseFloat(value) || 0;
+    const currentSplits = form.getValues('customSplits') || {};
+    form.setValue('customSplits', { ...currentSplits, [memberId]: numValue });
+  };
+
+  const validateCustomSplits = () => {
+    const customSplits = form.getValues('customSplits') || {};
+    const total = Object.values(customSplits).reduce((sum, val) => sum + val, 0);
+
+    if (splitType === 'percentage') {
+      if (Math.abs(total - 100) > 0.01) {
+        setCustomSplitError(`Percentages must add up to 100%. Current total: ${total.toFixed(2)}%`);
+        return false;
+      }
+    } else if (splitType === 'amount') {
+      if (Math.abs(total - amount) > 0.01) {
+        setCustomSplitError(`Amounts must add up to the total expense of $${amount.toFixed(2)}. Current total: $${total.toFixed(2)}`);
+        return false;
+      }
+    }
+    
+    setCustomSplitError(null);
+    return true;
+  };
+  
   const onSubmit = (data: FormValues) => {
     setIsSubmitting(true);
+
+    if (data.split !== 'equal' && !validateCustomSplits()) {
+      setIsSubmitting(false);
+      return;
+    }
     
     try {
       addExpense({
-        title: data.title,
+        ...data,
         amount: parseFloat(data.amount.toString()),
-        paidBy: data.paidBy,
-        participants: data.participants,
         date: data.date.toISOString(),
-        split: data.split,
-        description: data.description,
       });
       
       toast.success("Expense added successfully");
@@ -309,6 +347,31 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
                 </FormItem>
               )}
             />
+
+            {splitType !== 'equal' && participants.length > 0 && (
+              <div className="space-y-4 rounded-md p-4 glass-input">
+                <h4 className="font-medium">
+                  Split by {splitType === 'percentage' ? 'Percentage' : 'Amount'}
+                </h4>
+                <div className="space-y-2">
+                  {members
+                    .filter(m => participants.includes(m.id))
+                    .map(member => (
+                      <div key={member.id} className="flex items-center gap-2">
+                        <Label className="w-1/2">{member.name}</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          className="glass-input"
+                          placeholder={splitType === 'percentage' ? '%' : '$'}
+                          onChange={(e) => handleCustomSplitChange(member.id, e.target.value)}
+                        />
+                      </div>
+                    ))}
+                </div>
+                {customSplitError && <p className="text-sm text-red-500">{customSplitError}</p>}
+              </div>
+            )}
             
             <FormField
               control={form.control}
