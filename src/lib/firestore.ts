@@ -28,6 +28,20 @@ const checkFirebaseConfig = () => {
   return true;
 };
 
+// Function to test Firestore connectivity
+export const testFirestoreConnectivity = async (): Promise<boolean> => {
+  try {
+    if (!checkFirebaseConfig()) return false;
+    
+    // Try a simple read operation to test connectivity
+    const testDoc = await getDoc(doc(db, SESSIONS_COLLECTION, "connectivity-test"));
+    return true;
+  } catch (error) {
+    console.log("Firestore connectivity test failed:", error);
+    return false;
+  }
+};
+
 export const createSessionInFirestore = async (session: Session): Promise<void> => {
   try {
     if (!checkFirebaseConfig()) return;

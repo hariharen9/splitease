@@ -57,6 +57,8 @@ const SessionPage = () => {
     updateSessionTitle,
     syncSessionFromFirestore,
     isFirestoreConnected,
+    isFirestoreAvailable,
+    setFirestoreAvailable,
   } = useAppStore();
 
   const session = getCurrentSession();
@@ -101,9 +103,17 @@ const SessionPage = () => {
         if (updatedSession) {
           syncSessionFromFirestore(updatedSession);
         } else {
-          // Session was deleted or no longer exists
-          toast.error("Session no longer exists");
-          navigate("/");
+          // Only navigate away if the session was actually deleted, not just disconnected
+          // Check if we still have local data for this session
+          const localSession = getCurrentSession();
+          if (!localSession) {
+            // Session was actually deleted
+            toast.error("Session no longer exists");
+            navigate("/");
+          } else {
+            // Likely a connectivity issue, stay in the session
+            console.log("Connectivity issue - staying in session with local data");
+          }
         }
       });
 
@@ -116,7 +126,59 @@ const SessionPage = () => {
     
     // Return a no-op cleanup function if we don't subscribe
     return () => {};
-  }, [sessionId, sessionPin, isFirestoreConnected, syncSessionFromFirestore, navigate, session]); // Add session to dependencies
+  }, [sessionId, sessionPin, isFirestoreConnected, syncSessionFromFirestore, navigate, session, getCurrentSession]); // Add getCurrentSession to dependencies
+
+  // Monitor Firestore connectivity with periodic checks
+  useEffect(() => {
+    // Only monitor if we're supposed to be connected
+    if (!isFirestoreConnected) return;
+    
+    let connectivityCheckInterval: NodeJS.Timeout;
+    
+    const checkConnectivity = async () => {
+      try {
+        // In a real app, you would use Firestore's connectivity monitoring
+        // For now, we'll use navigator.onLine as a basic check
+        const isOnline = navigator.onLine;
+        if (isOnline !== isFirestoreAvailable) {
+          setFirestoreAvailable(isOnline);
+          if (isOnline) {
+            console.log("Firestore connection restored");
+          } else {
+            console.log("Firestore connection lost");
+          }
+        }
+      } catch (error) {
+        console.log("Connectivity check failed:", error);
+      }
+    };
+    
+    // Initial check
+    checkConnectivity();
+    
+    // Set up periodic checks
+    connectivityCheckInterval = setInterval(checkConnectivity, 5000); // Check every 5 seconds
+    
+    // Listen for online/offline events
+    const handleOnline = () => {
+      setFirestoreAvailable(true);
+      console.log("Browser went online");
+    };
+    
+    const handleOffline = () => {
+      setFirestoreAvailable(false);
+      console.log("Browser went offline");
+    };
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      clearInterval(connectivityCheckInterval);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [isFirestoreConnected, isFirestoreAvailable, setFirestoreAvailable]);
 
   const handleCopyPin = () => {
     // Check if clipboard API is available
@@ -218,10 +280,17 @@ const SessionPage = () => {
                   
                   {/* Firestore connection indicator */}
                   {isFirestoreConnected ? (
-                    <span className="flex items-center text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded-full">
-                      <Wifi className="h-3 w-3 mr-1" />
-                      Synced
-                    </span>
+                    isFirestoreAvailable ? (
+                      <span className="flex items-center text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded-full">
+                        <Wifi className="h-3 w-3 mr-1" />
+                        Synced
+                      </span>
+                    ) : (
+                      <span className="flex items-center text-xs text-red-400 bg-red-500/20 px-2 py-0.5 rounded-full">
+                        <WifiOff className="h-3 w-3 mr-1" />
+                        No Connection
+                      </span>
+                    )
                   ) : (
                     <span className="flex items-center text-xs text-orange-400 bg-orange-500/20 px-2 py-0.5 rounded-full">
                       <WifiOff className="h-3 w-3 mr-1" />

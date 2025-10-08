@@ -9,9 +9,11 @@ interface AppState {
   currentSessionId: string | null;
   currentSessionPin: string | null;
   isFirestoreConnected: boolean;
+  isFirestoreAvailable: boolean; // Real-time connection status
   
   // Firebase connection
   setFirestoreConnected: (connected: boolean) => void;
+  setFirestoreAvailable: (available: boolean) => void;
   
   // Session actions
   createSession: (title: string) => Promise<Session>;
@@ -45,9 +47,14 @@ export const useAppStore = create<AppState>()(
       currentSessionId: null,
       currentSessionPin: null,
       isFirestoreConnected: false,
+      isFirestoreAvailable: true, // Default to true, will be updated by connectivity monitoring
       
       setFirestoreConnected: (connected) => {
         set({ isFirestoreConnected: connected });
+      },
+      
+      setFirestoreAvailable: (available) => {
+        set({ isFirestoreAvailable: available });
       },
       
       createSession: async (title) => {
