@@ -45,6 +45,7 @@ const SessionPage = () => {
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showAddMemberPrompt, setShowAddMemberPrompt] = useState(false);
 
   const [balances, setBalances] = useState<Record<string, number>>({});
   const [settlements, setSettlements] = useState<Settlement[]>([]);
@@ -70,8 +71,16 @@ const SessionPage = () => {
       setBalances(calculatedBalances);
       const calculatedSettlements = calculateSettlements();
       setSettlements(calculatedSettlements);
+      
+      // Check if we should prompt to add members (only when first loading a session with no members)
+      if (session.members.length === 0 && !showAddMemberPrompt) {
+        setShowAddMemberPrompt(true);
+        setShowAddMember(true);
+        // Show a toast to explain why the dialog is opening
+        toast.info("Let's add some members to get started!");
+      }
     }
-  }, [session, calculateBalances, calculateSettlements]); // Use the entire session object to track all changes
+  }, [session, calculateBalances, calculateSettlements, showAddMemberPrompt]); // Use the entire session object to track all changes
 
   const {
     expenses = [],
@@ -166,6 +175,7 @@ const SessionPage = () => {
   
   const handleAddMemberComplete = useCallback(() => {
     setShowAddMember(false);
+    setShowAddMemberPrompt(false);
   }, []);
 
   const handleSettingsComplete = useCallback(() => {
