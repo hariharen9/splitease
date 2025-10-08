@@ -29,8 +29,18 @@ export function truncate(str: string, length: number): string {
   return str.slice(0, length) + "...";
 }
 
+let lastIdTimestamp = 0;
+let lastIdCounter = 0;
+
 export function generateId(): string {
-  return Math.random().toString(36).substring(2, 10);
+  const now = Date.now();
+  if (now === lastIdTimestamp) {
+    lastIdCounter++;
+  } else {
+    lastIdTimestamp = now;
+    lastIdCounter = 0;
+  }
+  return `${now.toString(36)}${lastIdCounter.toString(36)}`;
 }
 
 export function generatePin(length: number = 6): string {

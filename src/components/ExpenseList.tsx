@@ -86,19 +86,21 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
         animate="show"
         className="space-y-6"
       >
-        {Object.entries(groupedExpenses).map(([date, dateExpenses]) => (
-          <div key={date}>
+        {Object.entries(groupedExpenses).map(([date, dateExpenses], index) => (
+          <div key={`${date}-${index}`}>
             <div className="sticky top-16 z-10 flex items-center py-2 bg-background/80 backdrop-blur-sm">
               <h3 className="text-sm font-medium">{date}</h3>
               <div className="ml-4 h-px flex-1 bg-border"></div>
             </div>
             
             <div className="space-y-3 mt-2">
-              {dateExpenses.map((expense) => {
+              {dateExpenses.map((expense, index) => {
                 const paidBy = getMember(expense.paidBy);
+                // Create a unique key that combines the expense ID with the index to prevent duplicates
+                const uniqueKey = `${expense.id}-${index}`;
                 return (
                   <motion.div
-                    key={expense.id}
+                    key={uniqueKey}
                     variants={item}
                     whileHover={{ y: -2 }}
                     className="glass-panel rounded-lg overflow-hidden"

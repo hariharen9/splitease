@@ -19,6 +19,7 @@ interface AppState {
   getCurrentSession: () => Session | null;
   updateSessionTitle: (title: string) => Promise<void>;
   syncSessionFromFirestore: (session: Session) => void;
+  setCurrentSessionId: (id: string) => void;
   
   // Member actions
   addMember: (name: string) => Promise<void>;
@@ -135,6 +136,13 @@ export const useAppStore = create<AppState>()(
           )
         }));
       },
+
+      setCurrentSessionId: (id) => {
+        const session = get().sessions.find(s => s.id === id);
+        if (session) {
+          set({ currentSessionId: session.id, currentSessionPin: session.pin });
+        }
+      },
       
       updateSessionTitle: async (title) => {
         const currentSession = get().getCurrentSession();
@@ -183,13 +191,13 @@ export const useAppStore = create<AppState>()(
         }
         
         // Always update local state
-        set((state) => ({
-          sessions: state.sessions.map(s => 
-            s.id === currentSessionId
-              ? { ...s, members: [...s.members, newMember] }
-              : s
-          )
-        }));
+        // set((state) => ({
+        //   sessions: state.sessions.map(s => 
+        //     s.id === currentSessionId
+        //       ? { ...s, members: [...s.members, newMember] }
+        //       : s
+        //   )
+        // }));
       },
       
       removeMember: async (id) => {
@@ -228,11 +236,11 @@ export const useAppStore = create<AppState>()(
         }
         
         // Always update local state
-        set((state) => ({
-          sessions: state.sessions.map(s => 
-            s.id === currentSessionId ? updatedSession : s
-          )
-        }));
+        // set((state) => ({
+        //   sessions: state.sessions.map(s => 
+        //     s.id === currentSessionId ? updatedSession : s
+        //   )
+        // }));
       },
       
       updateMember: async (id, name) => {
@@ -260,13 +268,13 @@ export const useAppStore = create<AppState>()(
         }
         
         // Always update local state
-        set((state) => ({
-          sessions: state.sessions.map(s => 
-            s.id === currentSessionId
-              ? { ...s, members: updatedMembers }
-              : s
-          )
-        }));
+        // set((state) => ({
+        //   sessions: state.sessions.map(s => 
+        //     s.id === currentSessionId
+        //       ? { ...s, members: updatedMembers }
+        //       : s
+        //   )
+        // }));
       },
       
       addExpense: async (expense) => {
@@ -275,8 +283,18 @@ export const useAppStore = create<AppState>()(
         
         if (!currentSessionId) return;
         
+        // Get the current session to check for existing expense IDs
+        const session = get().getCurrentSession();
+        if (!session) return;
+        
+        let newExpenseId = generateId();
+        // Ensure the new ID is unique within the session
+        while (session.expenses.some(e => e.id === newExpenseId)) {
+          newExpenseId = generateId();
+        }
+        
         const newExpense: Expense = {
-          id: generateId(),
+          id: newExpenseId,
           createdAt: new Date().toISOString(),
           ...expense
         };

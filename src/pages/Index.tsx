@@ -33,6 +33,7 @@ const Index = () => {
   const joinSession = useAppStore((state) => state.joinSession);
   const sessions = useAppStore((state) => state.sessions);
   const setFirestoreConnected = useAppStore((state) => state.setFirestoreConnected);
+  const setCurrentSessionId = useAppStore((state) => state.setCurrentSessionId);
   
   // Check Firebase configuration on load
   useEffect(() => {
@@ -192,7 +193,10 @@ const Index = () => {
                 whileHover={{ y: -2 }}
                 whileTap={{ y: 0 }}
                 className="glass-panel border-white/10 p-3 rounded-lg cursor-pointer"
-                onClick={() => navigate(`/session/${session.id}`)}
+                onClick={() => {
+                  setCurrentSessionId(session.id);
+                  navigate(`/session/${session.id}`);
+                }}
               >
                 <div className="flex justify-between items-center">
                   <div>

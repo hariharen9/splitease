@@ -108,8 +108,40 @@ const SessionPage = () => {
   }, [id, refreshSessionData, isFirestoreConnected, sessionPin, syncSessionFromFirestore]);
 
   const handleCopyPin = () => {
-    navigator.clipboard.writeText(sessionPin);
-    toast.success("PIN copied to clipboard");
+    // Check if clipboard API is available
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(sessionPin)
+        .then(() => {
+          toast.success("PIN copied to clipboard");
+        })
+        .catch((error) => {
+          console.error("Failed to copy PIN to clipboard:", error);
+          toast.error("Failed to copy PIN to clipboard");
+        });
+    } else {
+      // Fallback for browsers that don't support clipboard API
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = sessionPin;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        const success = document.execCommand("copy");
+        textArea.remove();
+        
+        if (success) {
+          toast.success("PIN copied to clipboard");
+        } else {
+          toast.error("Failed to copy PIN to clipboard");
+        }
+      } catch (error) {
+        console.error("Failed to copy PIN to clipboard:", error);
+        toast.error("Failed to copy PIN to clipboard");
+      }
+    }
   };
   
   const handleEditTitle = () => {
