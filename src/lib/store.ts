@@ -21,6 +21,7 @@ interface AppState {
   updateCurrency: (currency: string) => Promise<void>;
   syncSessionFromFirestore: (session: Session) => void;
   setCurrentSessionId: (id: string) => void;
+  deleteSession: (sessionId: string) => Promise<void>;
   
   // Member actions
   addMember: (name: string) => Promise<void>;
@@ -329,12 +330,21 @@ export const useAppStore = create<AppState>()(
         if (get().isFirestoreConnected && currentPin) {
           try {
             await firestoreService.addExpenseToSession(currentPin, newExpense);
+            // Don't update local state here - let the Firestore subscription handle it
           } catch (error) {
             console.error("Error adding expense in Firestore:", error);
+            throw error; // Re-throw to let the caller handle the error
           }
+        } else {
+          // If not connected to Firestore, update local state directly
+          set((state) => ({
+            sessions: state.sessions.map(s => 
+              s.id === currentSessionId
+                ? { ...s, expenses: [...s.expenses, newExpense] }
+                : s
+          )
+        }));
         }
-        
-
       },
       
       removeExpense: async (id) => {
@@ -348,7 +358,27 @@ export const useAppStore = create<AppState>()(
         if (!session) return;
         
         // Create updated expenses list
-
+        const updatedExpenses = session.expenses.filter(e => e.id !== id);
+        
+        // Update in Firestore if connected
+        if (get().isFirestoreConnected && currentPin) {
+          try {
+            await firestoreService.updateSessionExpenses(currentPin, updatedExpenses);
+            // Don't update local state here - let the Firestore subscription handle it
+          } catch (error) {
+            console.error("Error removing expense in Firestore:", error);
+            throw error; // Re-throw to let the caller handle the error
+          }
+        } else {
+          // If not connected to Firestore, update local state directly
+          set((state) => ({
+            sessions: state.sessions.map(s => 
+              s.id === currentSessionId
+                ? { ...s, expenses: updatedExpenses }
+                : s
+            )
+          }));
+        }
       },
       
       updateExpense: async (id, expenseUpdates) => {
@@ -375,9 +405,43 @@ export const useAppStore = create<AppState>()(
           }
         }
         
-
+        // Always update local state
+        set((state) => ({
+          sessions: state.sessions.map(s => 
+            s.id === currentSessionId
+              ? { ...s, expenses: updatedExpenses }
+              : s
+          )
+        }));
       },
       
+      // Add delete session function
+      deleteSession: async (sessionId: string) => {
+        // Update in Firestore if connected
+        const sessionToDelete = get().sessions.find(s => s.id === sessionId);
+        if (get().isFirestoreConnected && sessionToDelete?.pin) {
+          try {
+            await firestoreService.deleteSessionFromFirestore(sessionToDelete.pin);
+          } catch (error: any) {
+            // If it's a "not found" error, that's fine - the document doesn't exist anyway
+            if (error?.code !== 'not-found') {
+              console.error("Error deleting session from Firestore:", error);
+              throw error;
+            }
+            // For "not found" errors, we continue to remove from local storage
+          }
+        }
+        
+        // Always update local state
+        set((state) => ({
+          sessions: state.sessions.filter(s => s.id !== sessionId),
+          // If we're deleting the current session, clear the current session ID
+          currentSessionId: state.currentSessionId === sessionId ? null : state.currentSessionId,
+          currentSessionPin: state.currentSessionId === sessionId ? null : state.currentSessionPin
+        }));
+      },
+      
+      // These calculation functions remain the same as they operate on the local state
       calculateBalances: () => {
         const session = get().getCurrentSession();
         if (!session) return {};

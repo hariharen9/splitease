@@ -71,7 +71,7 @@ const SessionPage = () => {
       const calculatedSettlements = calculateSettlements();
       setSettlements(calculatedSettlements);
     }
-  }, [sessionId, calculateBalances, calculateSettlements]); // Use sessionId instead of session
+  }, [session, calculateBalances, calculateSettlements]); // Use the entire session object to track all changes
 
   const {
     expenses = [],

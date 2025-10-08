@@ -155,3 +155,31 @@ export const subscribeToSession = (
     return () => {};
   }
 };
+
+// Add delete session function
+export const deleteSessionFromFirestore = async (pin: string): Promise<void> => {
+  try {
+    if (!checkFirebaseConfig()) return;
+    
+    console.log("Deleting session from Firestore with PIN:", pin);
+    // First, try to mark as deleted
+    try {
+      await updateDoc(doc(db, SESSIONS_COLLECTION, pin), {
+        deleted: true,
+        deletedAt: new Date().toISOString()
+      });
+      console.log("Session marked as deleted in Firestore");
+    } catch (updateError: any) {
+      // If update fails because document doesn't exist, that's fine
+      if (updateError?.code === 'not-found') {
+        console.log("Session document doesn't exist in Firestore, nothing to delete");
+        return;
+      }
+      // If it's another error, re-throw it
+      throw updateError;
+    }
+  } catch (error) {
+    console.error("Error marking session as deleted in Firestore:", error);
+    throw error;
+  }
+};

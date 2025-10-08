@@ -1,17 +1,17 @@
-
 import { Button } from "@/components/ui/button";
 import { Session } from "@/lib/types";
 import { cn, formatDate } from "@/lib/utils";
-import { ArrowRight, Copy, Users } from "lucide-react";
+import { ArrowRight, Copy, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 
 interface SessionCardProps {
   session: Session;
   onSelect: (sessionId: string) => void;
+  onDelete?: (sessionId: string) => void;
   className?: string;
 }
 
-const SessionCard = ({ session, onSelect, className }: SessionCardProps) => {
+const SessionCard = ({ session, onSelect, onDelete, className }: SessionCardProps) => {
   const handleCopyPin = () => {
     navigator.clipboard.writeText(session.pin);
     toast.success("PIN copied to clipboard");
@@ -26,14 +26,29 @@ const SessionCard = ({ session, onSelect, className }: SessionCardProps) => {
     >
       <div className="flex justify-between items-start mb-3">
         <h3 className="text-lg font-medium truncate">{session.title}</h3>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-8 w-8 text-muted-foreground hover:text-primary"
-          onClick={handleCopyPin}
-        >
-          <Copy className="h-4 w-4" />
-        </Button>
+        <div className="flex gap-1">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            onClick={handleCopyPin}
+          >
+            <Copy className="h-4 w-4" />
+          </Button>
+          {onDelete && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(session.id);
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
       
       <div className="flex items-center text-sm text-muted-foreground mb-4">
