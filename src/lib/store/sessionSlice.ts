@@ -227,24 +227,28 @@ export const createSessionSlice: StateCreator<SessionSlice, [], [], SessionSlice
       ...activity
     };
 
-    const sessions = get().sessions.map((s) =>
-      s.id === currentSessionId
-        ? { 
-            ...s, 
-            activities: [...(s.activities || []), newActivity].sort(
-              (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-            ).slice(0, 100) // Keep only the last 100 activities
-          }
-        : s
-    );
+    // Update local state with the new activity
+    const sessions = get().sessions.map((s) => {
+      if (s.id === currentSessionId) {
+        // Add new activity to the beginning of the array (newest first)
+        // Keep all activities, not just the last 100
+        const updatedActivities = [newActivity, ...(s.activities || [])];
+        return { 
+          ...s, 
+          activities: updatedActivities
+        };
+      }
+      return s;
+    });
     set({ sessions });
 
+    // Update Firestore with the new activity
     if (useAppStore.getState().isFirestoreConnected && currentPin) {
       try {
-        // Note: Firestore doesn't have a direct way to update nested arrays
-        // We'll need to update the entire session or use a subcollection
-        // For now, we'll rely on the session sync to handle this
-        console.log('Activity added locally. Firestore sync will handle remote update.');
+        const session = sessions.find(s => s.id === currentSessionId);
+        if (session && session.activities) {
+          await firestoreService.updateSessionActivities(currentPin, session.activities);
+        }
       } catch (error) {
         console.error('Error adding activity in Firestore:', error);
       }
