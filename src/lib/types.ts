@@ -1,4 +1,3 @@
-
 export interface Member {
   id: string;
   name: string;
@@ -45,7 +44,7 @@ export interface Settlement {
 
 export interface Activity {
   id: string;
-  type: 'expense_added' | 'expense_removed' | 'member_added' | 'member_removed' | 'settlement_completed' | 'session_created' | 'session_updated';
+  type: 'expense_added' | 'expense_removed' | 'expense_updated' | 'member_added' | 'member_removed' | 'settlement_completed' | 'session_created' | 'session_updated';
   timestamp: string; // ISO string
   description: string;
   details: any; // Type-specific details

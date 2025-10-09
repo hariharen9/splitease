@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Expense, Member } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,14 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { formatCurrency, formatDate, getInitials, getCurrencySymbol } from "@/lib/utils";
-import { PlusCircle, Receipt } from "lucide-react";
+import { PlusCircle, Receipt, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import EditExpenseDialog from "@/components/EditExpenseDialog";
 
 interface ExpenseListProps {
   expenses: Expense[];
@@ -26,6 +32,9 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
   onAddExpense,
   currency
 }) => {
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  
   // Sort expenses by date, newest first
   const sortedExpenses = [...expenses].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -45,6 +54,17 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
   // Get member by ID
   const getMember = (id: string): Member | undefined => {
     return members.find((member) => member.id === id);
+  };
+  
+  const handleEditExpense = (expense: Expense) => {
+    setEditingExpense(expense);
+    setShowEditDialog(true);
+  };
+  
+  const handleDeleteExpense = (expense: Expense) => {
+    // We'll handle deletion in the edit dialog
+    setEditingExpense(expense);
+    setShowEditDialog(true);
   };
   
   if (expenses.length === 0) {
@@ -110,10 +130,29 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
                     <div className="p-4">
                       <div className="flex justify-between mb-2">
                         <h4 className="font-medium">{expense.title}</h4>
-                        <span className="font-semibold">
-                          <span>{getCurrencySymbol(currency)}</span>
-                          {formatCurrency(expense.amount, currency)}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">
+                            <span>{getCurrencySymbol(currency)}</span>
+                            {formatCurrency(expense.amount, currency)}
+                          </span>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleEditExpense(expense)}>
+                                <Pencil className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleDeleteExpense(expense)} className="text-red-500">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
                       
                       <div className="flex items-center text-sm text-muted-foreground">
@@ -148,6 +187,17 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
           </div>
         ))}
       </motion.div>
+      
+      <EditExpenseDialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        members={members}
+        expense={editingExpense}
+        onComplete={() => {
+          setShowEditDialog(false);
+          setEditingExpense(null);
+        }}
+      />
     </div>
   );
 };

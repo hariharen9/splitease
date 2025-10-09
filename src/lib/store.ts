@@ -536,7 +536,7 @@ export const useAppStore = create<AppState>()(
           const payer = session.members.find(m => m.id === expenseToUpdate.paidBy);
           if (payer) {
             get().addActivity({
-              type: 'expense_removed',
+              type: 'expense_updated',
               description: `Expense updated: ${expenseToUpdate.title}`,
               details: {
                 oldExpense: expenseToUpdate,
