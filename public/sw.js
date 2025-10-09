@@ -4,8 +4,12 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/icon-128x128.png',
+  '/icon-144x144.png',
+  '/icon-152x152.png',
+  '/icon-192x192.png',
+  '/icon-384x384.png',
+  '/icon-512x512.png'
 ];
 
 // Install event - cache assets
@@ -20,34 +24,30 @@ self.addEventListener('install', event => {
 
 // Fetch event - serve from cache if available
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Return cached response if found
-        if (response) {
-          return response;
+  // We only want to handle navigation requests
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      (async () => {
+        try {
+          // Try to load the page from the network first
+          const networkResponse = await fetch(event.request);
+          return networkResponse;
+        } catch (error) {
+          // If the network fails, serve the app shell from the cache
+          const cache = await caches.open(CACHE_NAME);
+          const cachedResponse = await cache.match('/index.html');
+          return cachedResponse;
         }
-        // Otherwise fetch from network
-        return fetch(event.request)
-          .then(response => {
-            // Don't cache if not a valid response
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-            
-            // Clone the response
-            const responseToCache = response.clone();
-            
-            // Add to cache
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-              
-            return response;
-          });
+      })()
+    );
+  } else {
+    // For non-navigation requests, use a cache-first strategy
+    event.respondWith(
+      caches.match(event.request).then(response => {
+        return response || fetch(event.request);
       })
-  );
+    );
+  }
 });
 
 // Activate event - clean up old caches
