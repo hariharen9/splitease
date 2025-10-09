@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, Trash2 } from "lucide-react";
-import { useAppStore } from "@/lib/store";
+import { useAppStore } from "@/lib/store/index";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 

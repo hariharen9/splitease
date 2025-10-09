@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency, getInitials, getCurrencySymbol } from "@/lib/utils";
 import { ArrowRight, Check, CreditCard } from "lucide-react";
 import { toast } from "sonner";
-import { useAppStore } from "@/lib/store";
+import { useAppStore } from "@/lib/store/index";
 
 interface SettlementsViewProps {
   settlements: Settlement[];

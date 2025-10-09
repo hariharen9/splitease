@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator 
 } from "@/components/ui/dropdown-menu";
 import { Filter, ArrowDownUp, Calendar as CalendarIcon } from "lucide-react";
-import { useAppStore } from "@/lib/store";
+import { useAppStore } from "@/lib/store/index";
 import { 
   Select, 
   SelectContent, 

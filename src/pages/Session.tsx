@@ -15,7 +15,7 @@ import {
   WifiOff,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useAppStore } from "@/lib/store";
+import { useAppStore } from "@/lib/store/index";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

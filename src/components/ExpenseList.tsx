@@ -29,7 +29,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import EditExpenseDialog from "@/components/EditExpenseDialog";
-import { useAppStore } from "@/lib/store";
+import { useAppStore } from "@/lib/store/index";
 import { toast } from "sonner";
 
 import FilterSort from "@/components/FilterSort";

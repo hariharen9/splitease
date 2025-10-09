@@ -35,7 +35,7 @@ import { format } from "date-fns";
 import { CalendarIcon, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Member, SplitType, Expense } from "@/lib/types";
-import { useAppStore } from "@/lib/store";
+import { useAppStore } from "@/lib/store/index";
 import { toast } from "sonner";
 import {
   AlertDialog,

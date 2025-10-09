@@ -5,7 +5,7 @@ import { formatCurrency, getInitials, getCurrencySymbol } from "@/lib/utils";
 import { ArrowDownRight, ArrowUpRight, ArrowRight, Users } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { useAppStore } from "@/lib/store";
+import { useAppStore } from "@/lib/store/index";
 import { Badge } from "@/components/ui/badge";
 
 interface BalanceSummaryProps {

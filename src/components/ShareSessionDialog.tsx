@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Copy, Share2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import { useAppStore } from "@/lib/store";
+import { useAppStore } from "@/lib/store/index";
 
 interface ShareSessionDialogProps {
   open: boolean;

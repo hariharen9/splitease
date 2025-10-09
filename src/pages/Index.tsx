@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import Logo from "@/components/Logo";
 import PinInput from "@/components/PinInput";
-import { useAppStore } from "@/lib/store";
+import { useAppStore } from "@/lib/store/index";
 import { toast } from "sonner";
 import { ArrowRight, Plus, Users } from "lucide-react";
 import { isFirebaseConfigured } from "@/lib/firebase";

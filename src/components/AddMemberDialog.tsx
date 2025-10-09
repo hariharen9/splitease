@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Member } from "@/lib/types";
-import { useAppStore } from "@/lib/store";
+import { useAppStore } from "@/lib/store/index";
 import { toast } from "sonner";
 import { Trash2, User, UserPlus, AlertTriangle } from "lucide-react";
 import { getInitials } from "@/lib/utils";
