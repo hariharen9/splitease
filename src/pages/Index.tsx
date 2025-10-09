@@ -136,12 +136,12 @@ const Index = () => {
           <img 
             src="/logo.png" 
             alt="SplitEase Logo" 
-            className="h-16 w-16 object-contain"
+            className="h-20 w-20 object-contain"
           />
         </motion.div>
         
         <motion.h2 
-          className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-blue-400 bg-clip-text text-transparent mb-4"
+          className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-blue-400 bg-clip-text text-transparent mb-4 font-montserrat"
           initial={{ opacity: 0 }}
           animate={{ 
             opacity: 1,

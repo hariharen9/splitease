@@ -138,7 +138,8 @@ export default {
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],
-        mono: ["Roboto Mono", "monospace"]
+        mono: ["Roboto Mono", "monospace"],
+        montserrat: ["Montserrat", "sans-serif"]
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

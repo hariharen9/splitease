@@ -82,7 +82,7 @@ const AllSessions = () => {
                 <img 
                   src="/logo.png" 
                   alt="SplitEase Logo" 
-                  className="h-8 w-8 object-contain"
+                  className="h-10 w-10 object-contain"
                 />
               </motion.div>
               <motion.h1 

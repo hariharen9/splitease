@@ -336,9 +336,9 @@ const SessionPage = () => {
                       backgroundSize: '200% 200%',
                       backgroundImage: 'linear-gradient(90deg, #60a5fa, #8b5cf6, #60a5fa)'
                     }}
-                    className="text-lg font-medium bg-clip-text text-transparent"
+                    className="text-lg font-medium bg-clip-text text-transparent uppercase"
                   >
-                    {sessionTitle}
+                    {sessionTitle.toUpperCase()}
                   </motion.h1>
                   <motion.div
                     whileHover={{ scale: 1.1 }}
