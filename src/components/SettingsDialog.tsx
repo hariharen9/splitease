@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle,
-} from "@/components/ui/dialog";
+import {
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogDescription,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+} from "@/components/ResponsiveDialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -115,16 +114,16 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
   // If showing delete confirmation, render that instead
   if (showDeleteConfirmation) {
     return (
-      <Dialog open={open} onOpenChange={handleCancelDelete}>
-        <DialogContent className="glass-panel border-white/10 sm:max-w-[400px]">
+      <ResponsiveDialog open={open} onOpenChange={handleCancelDelete}>
+        <ResponsiveDialogContent className="glass-panel border-white/10 sm:max-w-[400px] max-w-[95vw] mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-destructive">
+            <ResponsiveDialogHeader>
+              <ResponsiveDialogTitle className="flex items-center gap-2 text-destructive">
                 <motion.div
                   animate={{ rotate: [0, 10, -10, 0] }}
                   transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
@@ -132,20 +131,20 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
                   <AlertTriangle className="h-5 w-5" />
                 </motion.div>
                 Delete Session
-              </DialogTitle>
+              </ResponsiveDialogTitle>
               {deleteStep === 1 ? (
-                <DialogDescription>
+                <ResponsiveDialogDescription>
                   This action cannot be undone. This will permanently delete your session and remove all associated data.
-                </DialogDescription>
+                </ResponsiveDialogDescription>
               ) : (
-                <DialogDescription>
+                <ResponsiveDialogDescription>
                   To confirm, please type the session name: <span className="font-semibold">{session?.title}</span>
-                </DialogDescription>
+                </ResponsiveDialogDescription>
               )}
-            </DialogHeader>
+            </ResponsiveDialogHeader>
             
             <motion.div 
-              className="py-4"
+              className="py-4 max-h-[60vh] overflow-y-auto"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1 }}
@@ -194,7 +193,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
               )}
             </motion.div>
             
-            <DialogFooter>
+            <div className="flex justify-end gap-2 mt-4">
               <motion.div
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
@@ -215,31 +214,31 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
                   {deleteStep === 1 ? "Continue" : "Delete Session"}
                 </Button>
               </motion.div>
-            </DialogFooter>
+            </div>
           </motion.div>
-        </DialogContent>
-      </Dialog>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-panel border-white/10 sm:max-w-[400px]">
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent className="glass-panel border-white/10 sm:max-w-[400px] max-w-[95vw] mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
         >
-          <DialogHeader>
-            <DialogTitle>Settings</DialogTitle>
-            <DialogDescription>
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle>Settings</ResponsiveDialogTitle>
+            <ResponsiveDialogDescription>
               Customize your session settings
-            </DialogDescription>
-          </DialogHeader>
+            </ResponsiveDialogDescription>
+          </ResponsiveDialogHeader>
           
           <motion.div 
-            className="space-y-4 py-4"
+            className="space-y-4 py-4 max-h-[60vh] overflow-y-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.1 }}
@@ -308,7 +307,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
             </motion.div>
           </motion.div>
           
-          <DialogFooter>
+          <div className="flex justify-end gap-2 mt-4">
             <motion.div
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
@@ -328,10 +327,10 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
                 Save
               </Button>
             </motion.div>
-          </DialogFooter>
+          </div>
         </motion.div>
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 };
 
