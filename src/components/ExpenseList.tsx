@@ -49,6 +49,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const removeExpense = useAppStore((state) => state.removeExpense);
+  const categories = useAppStore((state) => state.categories);
   
   // Sort expenses by date, newest first
   const sortedExpenses = [...expenses].sort(
@@ -145,6 +146,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
             <div className="space-y-3 mt-2">
               {dateExpenses.map((expense, index) => {
                 const paidBy = getMember(expense.paidBy);
+                const category = categories.find(c => c.id === expense.categoryId);
                 // Create a unique key that combines the expense ID with the index to prevent duplicates
                 const uniqueKey = `${expense.id}-${index}`;
                 return (
@@ -156,7 +158,10 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
                   >
                     <div className="p-4">
                       <div className="flex justify-between mb-2">
-                        <h4 className="font-medium">{expense.title}</h4>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">{category?.icon}</span>
+                          <h4 className="font-medium">{expense.title}</h4>
+                        </div>
                         <div className="flex items-center gap-2">
                           <span className="font-semibold">
                             <span>{getCurrencySymbol(currency)}</span>

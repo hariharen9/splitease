@@ -1,12 +1,24 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Session, Expense, Member, Settlement, Activity } from './types';
+import { Session, Expense, Member, Settlement, Activity, Category } from './types';
 import { generatePin, generateId } from './utils';
 import * as firestoreService from './firestore';
 
+const defaultCategories: Category[] = [
+  { id: 'food', name: 'Food', icon: '🍔' },
+  { id: 'transport', name: 'Transport', icon: '🚗' },
+  { id: 'shopping', name: 'Shopping', icon: '🛍️' },
+  { id: 'utilities', name: 'Utilities', icon: '💡' },
+  { id: 'entertainment', name: 'Entertainment', icon: '🎉' },
+  { id: 'other', name: 'Other', icon: '🤷' },
+];
+
 interface AppState {
   sessions: Session[];
+  categories: Category[];
   currentSessionId: string | null;
+
   currentSessionPin: string | null;
   isFirestoreConnected: boolean;
   isFirestoreAvailable: boolean; // Real-time connection status
@@ -46,6 +58,7 @@ export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       sessions: [],
+      categories: defaultCategories,
       currentSessionId: null,
       currentSessionPin: null,
       isFirestoreConnected: false,
@@ -405,6 +418,7 @@ export const useAppStore = create<AppState>()(
         const newExpense: Expense = {
           id: newExpenseId,
           createdAt: new Date().toISOString(),
+          categoryId: 'other',
           ...expense
         };
         

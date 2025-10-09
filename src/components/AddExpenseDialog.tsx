@@ -52,6 +52,7 @@ interface FormValues {
   participants: string[];
   date: Date;
   split: SplitType;
+  categoryId: string;
   description?: string;
   customSplits?: Record<string, number>;
 }
@@ -64,7 +65,7 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [customSplitError, setCustomSplitError] = useState<string | null>(null);
-  const addExpense = useAppStore((state) => state.addExpense);
+  const { addExpense, categories } = useAppStore();
   
   const form = useForm<FormValues>({
     defaultValues: {
@@ -74,6 +75,7 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
       participants: members.map(m => m.id),
       date: new Date(),
       split: "equal",
+      categoryId: "other",
       description: "",
       customSplits: {}
     }
@@ -197,6 +199,34 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
                         />
                       </div>
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="categoryId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="glass-input">
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            <span className="flex items-center">
+                              <span className="mr-2">{category.icon}</span>
+                              <span>{category.name}</span>
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

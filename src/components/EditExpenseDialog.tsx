@@ -63,6 +63,7 @@ interface FormValues {
   participants: string[];
   date: Date;
   split: SplitType;
+  categoryId: string;
   description?: string;
   customSplits?: Record<string, number>;
 }
@@ -77,7 +78,7 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [customSplitError, setCustomSplitError] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const { updateExpense, removeExpense } = useAppStore();
+  const { updateExpense, removeExpense, categories } = useAppStore();
   
   const form = useForm<FormValues>({
     defaultValues: {
@@ -87,6 +88,7 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
       participants: members.map(m => m.id),
       date: new Date(),
       split: "equal",
+      categoryId: "other",
       description: "",
       customSplits: {}
     }
@@ -106,6 +108,7 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
         participants: expense.participants,
         date: new Date(expense.date),
         split: expense.split,
+        categoryId: expense.categoryId,
         description: expense.description || "",
         customSplits: expense.customSplits || {}
       });
@@ -239,12 +242,42 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                           />
                         </div>
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <div className="grid grid-cols-2 gap-4">
+                      
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                      
+                                    <FormField
+                                      control={form.control}
+                                      name="categoryId"
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormLabel>Category</FormLabel>
+                                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                              <SelectTrigger className="glass-input">
+                                                <SelectValue placeholder="Select a category" />
+                                              </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                              {categories.map((category) => (
+                                                <SelectItem key={category.id} value={category.id}>
+                                                  <span className="flex items-center">
+                                                    <span className="mr-2">{category.icon}</span>
+                                                    <span>{category.name}</span>
+                                                  </span>
+                                                </SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                                    
+                                    <div className="grid grid-cols-2 gap-4">
+                      
                   <FormField
                     control={form.control}
                     name="paidBy"

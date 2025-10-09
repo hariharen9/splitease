@@ -1,23 +1,30 @@
+export type SplitType = "equal" | "percentage" | "amount";
+
+export interface Category {
+  id: string;
+  name: string;
+  icon: string;
+}
+
 export interface Member {
   id: string;
   name: string;
-  avatarColor?: string;
+  avatarColor: string;
 }
 
 export interface Expense {
   id: string;
   title: string;
   amount: number;
-  paidBy: string; // member ID
-  participants: string[]; // array of member IDs
-  date: string; // ISO string
+  date: string;
+  paidBy: string;
+  participants: string[];
   split: SplitType;
-  customSplits?: Record<string, number>; // memberID: amount
-  createdAt: string; // ISO string
+  categoryId: string;
   description?: string;
+  customSplits?: Record<string, number>;
+  createdAt: string;
 }
-
-export type SplitType = 'equal' | 'percentage' | 'amount';
 
 export interface Session {
   id: string;
