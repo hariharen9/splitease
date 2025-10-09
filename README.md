@@ -1,106 +1,142 @@
-# Splitease 💸
+<div align="center">
+  <a href="https://splitease.netlify.app/" target="_blank">
+    <img src="public/placeholder.svg" alt="Splitease Logo" width="120">
+  </a>
+  <h1 align="center">Splitease</h1>
+  <p align="center">
+    Split bills, not friendships. A modern, intuitive bill-splitting application that makes shared expenses effortless.
+    <br />
+    <a href="https://splitease.netlify.app/"><strong>splitease.netlify.app »</strong></a>
+    <br />
+    <br />
+    <a href="https://github.com/hariharen/splitease/issues/new?template=bug_report.md">Report Bug</a>
+    ·
+    <a href="https://github.com/hariharen/splitease/issues/new?template=feature_request.md">Request Feature</a>
+  </p>
+</div>
+
+<div align="center">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-4.9.5-blue.svg)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-18.2.0-blue.svg)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.5.3-blue.svg)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.3.1-blue.svg)](https://react.dev/)
 [![PWA Ready](https://img.shields.io/badge/PWA-Ready-brightgreen.svg)](https://web.dev/progressive-web-apps/)
 [![Firestore](https://img.shields.io/badge/Firestore-Enabled-orange.svg)](https://firebase.google.com/docs/firestore)
 
-> **Splitease** is a modern, WEB BASED intuitive bill splitting application that takes the hassle out of shared expenses. Whether you're traveling with friends, sharing an apartment, or organizing a group dinner, Splitease makes tracking and settling expenses effortless. Also, 100% FREE
+</div>
 
-> Made with AI ( GPT, Deepseek and Trae )
+---
 
-![Splitease Demo](./public/og-image.png)
+## 🌟 About Splitease
+
+**Splitease** is a modern, web-based bill-splitting application designed to eliminate the hassle of shared expenses. Whether you're traveling with friends, sharing an apartment, or organizing a group dinner, Splitease provides an intuitive and effortless way to track and settle expenses. Best of all, it's 100% free and requires no account creation.
+
+<div align="center">
+  <img src="public/og-image.png" alt="Splitease Demo" width="80%">
+</div>
+
+---
 
 ## ✨ Features
 
-### Core Functionality
-- **🧮 Smart Expense Calculations** - Real-time balance tracking with support for equal, percentage, and custom amount splits
-- **📊 Intelligent Settlement Suggestions** - Optimized payment plans to minimize the number of transactions needed
-- **👥 Multi-member Support** - Add unlimited members to your expense sessions
-- **🔄 Real-time Syncing** - Changes reflect instantly across all devices
+Splitease is packed with features to make expense management a breeze:
 
-### Technical Features
-- **🔥 Firestore Integration** - Cloud-based data persistence with offline support
-- **🔒 PIN-based Session Sharing** - Easily share expense sessions with friends
-- **🎨 Modern UI/UX** - Beautiful interface built with shadcn-ui and Tailwind CSS
-- **⚡ Lightning Fast** - Built with Vite for optimal performance
+- **🧮 Smart Expense Calculations:** Real-time balance tracking with support for equal, percentage, and custom amount splits.
+- **📊 Intelligent Settlement Suggestions:** Optimized payment plans to minimize the number of transactions needed to settle up.
+- **👥 Multi-member Support:** Add unlimited members to your expense sessions.
+- **🔄 Real-time Syncing:** Changes reflect instantly across all devices with an optional Firebase integration.
+- **🔥 Firestore Integration:** Cloud-based data persistence with offline support.
+- **🔒 PIN-based Session Sharing:** Easily share expense sessions with friends using a simple PIN.
+- **🎨 Modern UI/UX:** A beautiful and intuitive interface built with **shadcn-ui** and **Tailwind CSS**.
+- **⚡ Lightning Fast:** Built with **Vite** for optimal performance and a seamless user experience.
+- **📱 PWA Ready:** Install Splitease on your home screen for quick access, even offline.
+- **🌐 No Account Required:** Get started right away without the need for registration.
 
-## 🚀 Getting Started
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/splitease.git
-
-# Navigate to project directory
-cd splitease
-
-# Install dependencies
-npm install
-
-# Start the development server
-npm run dev
-```
-
-### Usage
-
-1. **Create a Session** - Start a new expense session and share the PIN with friends
-2. **Add Members** - Add everyone who's part of the expense group
-3. **Track Expenses** - Record expenses as they happen, specifying who paid and who participated
-4. **Settle Up** - Use the suggested settlements to easily square up with everyone
+---
 
 ## 💻 Technologies
 
-Splitease is built with a modern tech stack:
+Splitease is built with a modern and powerful tech stack:
 
-- **Frontend Framework**: React 18 with TypeScript
-- **Styling**: Tailwind CSS with shadcn-ui components
-- **Build Tool**: Vite for fast development and optimized production builds
-- **Database**: Firebase Firestore (optional)
-- **PWA Support**: Service workers for offline functionality
+- **Frontend Framework:** [React 18](https://react.dev/) with [TypeScript](https://www.typescriptlang.org/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/) with [shadcn-ui](https://ui.shadcn.com/) components
+- **Build Tool:** [Vite](https://vitejs.dev/)
+- **State Management:** [Zustand](https://zustand-demo.pmnd.rs/)
+- **Database (Optional):** [Firebase Firestore](https://firebase.google.com/docs/firestore)
+- **PWA Support:** Service workers for offline functionality
+
+---
+
+## 🚀 Getting Started
+
+To get a local copy up and running, follow these simple steps.
+
+### Prerequisites
+
+Make sure you have [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/) installed on your machine.
+
+### Installation
+
+1.  **Clone the repository:**
+    ```sh
+    git clone https://github.com/hariharen/splitease.git
+    ```
+2.  **Navigate to the project directory:**
+    ```sh
+    cd splitease
+    ```
+3.  **Install dependencies:**
+    ```sh
+    npm install
+    ```
+4.  **Start the development server:**
+    ```sh
+    npm run dev
+    ```
+
+The application will be available at `http://localhost:8080`.
+
+---
+
+## 📖 Usage
+
+1.  **Create a Session:** Start a new expense session and give it a name.
+2.  **Share the PIN:** Share the generated PIN with your friends to let them join.
+3.  **Add Members:** Add everyone who's part of the expense group.
+4.  **Track Expenses:** Record expenses as they happen, specifying who paid and how the bill should be split.
+5.  **Settle Up:** Use the suggested settlements to easily square up with everyone in the group.
+
+---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Feel free to open issues or submit pull requests.
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+
+1.  **Fork the Project**
+2.  **Create your Feature Branch** (`git checkout -b feature/AmazingFeature`)
+3.  **Commit your Changes** (`git commit -m 'Add some AmazingFeature'`)
+4.  **Push to the Branch** (`git push origin feature/AmazingFeature`)
+5.  **Open a Pull Request**
+
+---
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
 
 ## 👨‍💻 Author
 
-Developed with ❤️ by [Hariharen](https://www.linkedin.com/in/hariharen9/)
+Developed with ❤️ by **Hariharen**
+
+-   LinkedIn: [linkedin.com/in/hariharen9](https://www.linkedin.com/in/hariharen9/)
+-   GitHub: [github.com/hariharen](https://github.com/hariharen)
 
 ---
 
-## 🌟 Why Splitease?
-
-### Pain-free Expense Sharing
-
-Tired of the mental math and awkward money conversations? Splitease handles all calculations automatically, showing exactly who owes what to whom.
-
-### Works Anywhere, Anytime
-
-As a Progressive Web App, Splitease works on any device with a browser. Install it on your home screen for quick access, and use it even without an internet connection.
-
-### No Account Required
-
-Unlike other expense-sharing apps, Splitease doesn't require account creation or personal information. Just create a session, share the PIN, and you're ready to go.
-
-### Beautiful Visualization
-
-See your expenses and balances at a glance with our intuitive interface. Color-coded indicators make it easy to understand your financial situation within the group.
-
----
-
-<p align="center">
-  <b>Splitease - Split bills, not friendships.</b>
-</p>
+<div align="center">
+  <p><strong>Splitease - Split bills, not friendships.</strong></p>
+</div>

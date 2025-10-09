@@ -7,15 +7,60 @@
   "background_color": "#151926",
   "theme_color": "#6366f1",
   "orientation": "portrait",
+  "scope": "/",
+  "categories": ["finance", "utilities"],
+  "screenshots": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Session",
+      "short_name": "New",
+      "description": "Create a new expense session",
+      "url": "/",
+      "icons": [{"src": "/icon-192x192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "All Sessions",
+      "short_name": "Sessions",
+      "description": "View all your expense sessions",
+      "url": "/sessions",
+      "icons": [{"src": "/icon-192x192.png", "sizes": "192x192"}]
+    }
+  ],
   "icons": [
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

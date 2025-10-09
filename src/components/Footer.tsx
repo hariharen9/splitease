@@ -23,7 +23,7 @@ const Footer: React.FC = () => {
         </motion.div>
         {' '}by{' '}
         <motion.a 
-          href="https://www.linkedin.com/in/hariharen9/" 
+          href="https://hariharen9.site/" 
           target="_blank" 
           rel="noopener noreferrer"
           className="font-medium hover:text-primary transition-colors underline underline-offset-4"
