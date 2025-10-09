@@ -40,6 +40,7 @@ import BalanceSummary from "@/components/BalanceSummary";
 import SettlementsView from "@/components/SettlementsView";
 import { subscribeToSession } from "@/lib/firestore";
 import SettingsDialog from "@/components/SettingsDialog";
+import AnalyticsDialog from "@/components/AnalyticsDialog";
 import ActivityTab from "@/components/ActivityTab";
 import ShareSessionDialog from "@/components/ShareSessionDialog";
 import RenameDialog from "@/components/RenameDialog";
@@ -56,6 +57,7 @@ const SessionPage = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showRename, setShowRename] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
   const [showAddMemberPrompt, setShowAddMemberPrompt] = useState(false);
 
   const [balances, setBalances] = useState<Record<string, number>>({});
@@ -442,6 +444,10 @@ const SessionPage = () => {
                     <Users className="mr-2 h-4 w-4" />
                     Manage Members
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowAnalytics(true)}>
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    Analytics
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setShowSettings(true)}>
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
@@ -694,6 +700,19 @@ const SessionPage = () => {
             key="settings-dialog"
             open={showSettings}
             onOpenChange={setShowSettings}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showAnalytics && (
+          <AnalyticsDialog
+            key="analytics-dialog"
+            open={showAnalytics}
+            onOpenChange={setShowAnalytics}
+            expenses={expenses}
+            members={members}
+            currency={session?.currency}
           />
         )}
       </AnimatePresence>
