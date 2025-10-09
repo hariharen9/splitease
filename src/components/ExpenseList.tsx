@@ -32,6 +32,8 @@ import EditExpenseDialog from "@/components/EditExpenseDialog";
 import { useAppStore } from "@/lib/store";
 import { toast } from "sonner";
 
+import FilterSort from "@/components/FilterSort";
+
 interface ExpenseListProps {
   expenses: Expense[];
   members: Member[];
@@ -48,18 +50,44 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [filters, setFilters] = useState({
+    sort: "date-desc",
+    category: "all",
+    dateRange: { from: undefined, to: undefined },
+    amountRange: { min: undefined, max: undefined },
+  });
   const removeExpense = useAppStore((state) => state.removeExpense);
   const categories = useAppStore((state) => state.categories);
   
-  // Sort expenses by date, newest first
-  const sortedExpenses = [...expenses].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
-  
+  const filteredAndSortedExpenses = expenses
+    .filter((expense) => {
+      const { category, dateRange, amountRange } = filters;
+      if (category !== "all" && expense.categoryId !== category) return false;
+      if (dateRange.from && new Date(expense.date) < dateRange.from) return false;
+      if (dateRange.to && new Date(expense.date) > dateRange.to) return false;
+      if (amountRange.min && expense.amount < amountRange.min) return false;
+      if (amountRange.max && expense.amount > amountRange.max) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      const { sort } = filters;
+      switch (sort) {
+        case "date-asc":
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        case "amount-desc":
+          return b.amount - a.amount;
+        case "amount-asc":
+          return a.amount - b.amount;
+        case "date-desc":
+        default:
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+      }
+    });
+
   // Group expenses by date
   const groupedExpenses: Record<string, Expense[]> = {};
   
-  sortedExpenses.forEach((expense) => {
+  filteredAndSortedExpenses.forEach((expense) => {
     const date = formatDate(expense.date);
     if (!groupedExpenses[date]) {
       groupedExpenses[date] = [];
@@ -130,6 +158,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
   
   return (
     <div>
+      <FilterSort filters={filters} setFilters={setFilters} />
       <motion.div 
         variants={container}
         initial="hidden"
