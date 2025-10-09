@@ -29,7 +29,9 @@
 
 ## 🌟 About Splitease
 
-**Splitease** is a modern, web-based bill-splitting application designed to eliminate the hassle of shared expenses. Whether you're traveling with friends, sharing an apartment, or organizing a group dinner, Splitease provides an intuitive and effortless way to track and settle expenses. Best of all, it's 100% free and requires no account creation.
+**Splitease** is a modern, feature-rich, web-based bill-splitting application designed to eliminate the hassle of shared expenses. While many bill-splitting apps are either too simple or require cumbersome account creation, Splitease offers a powerful suite of features in a free, no-signup-required package.
+
+Whether you're traveling with friends, sharing an apartment, or organizing a group dinner, Splitease provides an intuitive and effortless way to track and settle expenses with real-time synchronization.
 
 <div align="center">
   <img src="public/og-image.png" alt="Splitease Demo" width="80%">
@@ -39,18 +41,40 @@
 
 ## ✨ Features
 
-Splitease is packed with features to make expense management a breeze:
+Splitease is packed with features that provide a comprehensive and seamless expense management experience:
 
-- **🧮 Smart Expense Calculations:** Real-time balance tracking with support for equal, percentage, and custom amount splits.
-- **📊 Intelligent Settlement Suggestions:** Optimized payment plans to minimize the number of transactions needed to settle up.
-- **👥 Multi-member Support:** Add unlimited members to your expense sessions.
-- **🔄 Real-time Syncing:** Changes reflect instantly across all devices with an optional Firebase integration.
-- **🔥 Firestore Integration:** Cloud-based data persistence with offline support.
-- **🔒 PIN-based Session Sharing:** Easily share expense sessions with friends using a simple PIN.
+#### Core Functionality
+- **🧮 Smart Expense Splitting:** Split expenses by equal, percentage, or exact custom amounts.
+- **📊 Intelligent Settlements:** Get optimized payment suggestions to settle debts with the minimum number of transactions.
+- **👥 Unlimited Members:** Add as many members to a session as you need.
+- **📂 Multi-Session Management:** Create and switch between multiple expense sessions.
+
+#### Modern & User-Friendly
+- **🌐 No Account Required:** Jump right in without the need for registration.
 - **🎨 Modern UI/UX:** A beautiful and intuitive interface built with **shadcn-ui** and **Tailwind CSS**.
-- **⚡ Lightning Fast:** Built with **Vite** for optimal performance and a seamless user experience.
-- **📱 PWA Ready:** Install Splitease on your home screen for quick access, even offline.
-- **🌐 No Account Required:** Get started right away without the need for registration.
+- **⚡ Lightning Fast:** Built with **Vite** for a snappy and seamless user experience.
+- **📱 PWA Ready:** Install Splitease on your home screen for an app-like experience, including offline access.
+
+#### Advanced Features
+- **🔄 Real-time Syncing:** All session data syncs instantly across all devices with an optional Firebase backend.
+- **🔗 Effortless Sharing:** Share sessions easily with a **PIN**, a direct **Magic Link**, or a scannable **QR Code**.
+- **📈 Spending Analytics:** Visualize spending habits with charts for expenses by category and member.
+- **📝 Activity Log:** Keep track of all actions taken within a session with a filterable history.
+
+---
+
+## 🤔 Why Splitease?
+
+In a world of subscription fees and data-hungry apps, Splitease stands out by offering a unique combination of power and simplicity, completely for free.
+
+| Feature                  | Splitease | Most Alternatives |
+| ------------------------ | :-------: | :---------------: |
+| **No Account Required**  |    ✅     |        ❌         |
+| **Free to Use**          |    ✅     |   Often limited   |
+| **Real-time Sync**       |    ✅     |        ❌         |
+| **Advanced Splitting**   |    ✅     |   Often basic     |
+| **Link & QR Code Sharing** |    ✅     |        ❌         |
+| **Spending Analytics**   |    ✅     |        ❌         |
 
 ---
 
@@ -116,7 +140,7 @@ If you have a suggestion that would make this better, please fork the repo and c
 
 1.  **Fork the Project**
 2.  **Create your Feature Branch** (`git checkout -b feature/AmazingFeature`)
-3.  **Commit your Changes** (`git commit -m 'Add some AmazingFeature'`)
+3.  **Commit your Changes** (`git commit -m '''Add some AmazingFeature'''`)
 4.  **Push to the Branch** (`git push origin feature/AmazingFeature`)
 5.  **Open a Pull Request**
 
