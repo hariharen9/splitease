@@ -648,6 +648,7 @@ const SessionPage = () => {
             onOpenChange={setShowAddExpense}
             members={members}
             onComplete={handleAddExpenseComplete}
+            currency={session?.currency}
           />
         )}
       </AnimatePresence>

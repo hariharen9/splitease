@@ -396,6 +396,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
             setShowEditDialog(false);
             setEditingExpense(null);
           }}
+          currency={currency}
         />
       )}
     </div>

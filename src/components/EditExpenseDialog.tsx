@@ -34,7 +34,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { CalendarIcon, Trash2, Edit, DollarSign, Tag, User, Users } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getCurrencySymbol } from "@/lib/utils";
 import { Member, SplitType, Expense } from "@/lib/types";
 import { useAppStore } from "@/lib/store/index";
 import { toast } from "sonner";
@@ -55,6 +55,7 @@ interface EditExpenseDialogProps {
   members: Member[];
   expense: Expense | null;
   onComplete: () => void;
+  currency?: string;
 }
 
 interface FormValues {
@@ -74,7 +75,8 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
   onOpenChange,
   members,
   expense,
-  onComplete
+  onComplete,
+  currency = "INR"
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [customSplitError, setCustomSplitError] = useState<string | null>(null);
@@ -163,7 +165,7 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
       }
     } else if (splitType === 'amount') {
       if (Math.abs(total - amount) > 0.01) {
-        setCustomSplitError(`Amounts must add up to the total expense of $${amount.toFixed(2)}. Current total: $${total.toFixed(2)}`);
+        setCustomSplitError(`Amounts must add up to the total expense of ${getCurrencySymbol(currency)}${amount.toFixed(2)}. Current total: ${getCurrencySymbol(currency)}${total.toFixed(2)}`);
         return false;
       }
     }
@@ -514,7 +516,7 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                               className="mb-3 p-2 bg-gradient-to-r from-blue-500/20 to-purple-600/20 rounded-md"
                             >
                               <p className="text-sm font-medium text-center">
-                                Total expense amount: <span className="font-bold">${amount.toFixed(2)}</span>
+                                Total expense amount: <span className="font-bold">{getCurrencySymbol(currency)}{amount.toFixed(2)}</span>
                               </p>
                             </motion.div>
                           )}
@@ -547,7 +549,7 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                                     <Input
                                       type="number"
                                       step={splitType === "percentage" ? "0.1" : "0.01"}
-                                      placeholder={splitType === "percentage" ? "0.0%" : "$0.00"}
+                                      placeholder={splitType === "percentage" ? "0.0%" : `${getCurrencySymbol(currency)}0.00`}
                                       className="glass-input w-24 text-right text-sm"
                                       onChange={(e) => {
                                         handleCustomSplitChange(participantId, e.target.value);
@@ -578,12 +580,18 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                               <span className="text-muted-foreground">
                                 {splitType === "percentage" ? "Total Percentage:" : "Total Amount:"}
                               </span>
-                              <span className={splitType === "percentage" 
-                                ? (Math.abs(Object.values(form.getValues('customSplits') || {}).reduce((sum, val) => sum + val, 0) - 100) < 0.01 ? "font-medium text-green-400" : "font-medium text-red-400")
-                                : (Math.abs(Object.values(form.getValues('customSplits') || {}).reduce((sum, val) => sum + val, 0) - amount) < 0.01 ? "font-medium text-green-400" : "font-medium text-red-400")}>
+                              <span className={
+                                splitType === "percentage" 
+                                  ? (Math.abs(Object.values(form.getValues('customSplits') || {}).reduce((sum, val) => sum + val, 0) - 100) < 0.01 
+                                      ? "font-medium text-green-400" 
+                                      : "font-medium text-red-400")
+                                  : (Math.abs(Object.values(form.getValues('customSplits') || {}).reduce((sum, val) => sum + val, 0) - amount) < 0.01 
+                                      ? "font-medium text-green-400" 
+                                      : "font-medium text-red-400")
+                              }>
                                 {splitType === "percentage" 
                                   ? `${Object.values(form.getValues('customSplits') || {}).reduce((sum, val) => sum + val, 0).toFixed(2)}%`
-                                  : `$${Object.values(form.getValues('customSplits') || {}).reduce((sum, val) => sum + val, 0).toFixed(2)}`}
+                                  : `${getCurrencySymbol(currency)}${Object.values(form.getValues('customSplits') || {}).reduce((sum, val) => sum + val, 0).toFixed(2)}`}
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
@@ -591,7 +599,7 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                                 {splitType === "percentage" ? "Required:" : "Required:"}
                               </span>
                               <span className="font-medium">
-                                {splitType === "percentage" ? "100%" : `$${amount.toFixed(2)}`}
+                                {splitType === "percentage" ? "100%" : `${getCurrencySymbol(currency)}${amount.toFixed(2)}`}
                               </span>
                             </div>
                           </div>

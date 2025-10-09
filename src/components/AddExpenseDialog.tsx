@@ -33,7 +33,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { CalendarIcon, Plus, DollarSign, Tag, User, Users } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getCurrencySymbol } from "@/lib/utils";
 import { Member, SplitType } from "@/lib/types";
 import { useAppStore } from "@/lib/store/index";
 import { toast } from "sonner";
@@ -44,6 +44,7 @@ interface AddExpenseDialogProps {
   onOpenChange: (open: boolean) => void;
   members: Member[];
   onComplete: () => void;
+  currency?: string;
 }
 
 interface FormValues {
@@ -62,7 +63,8 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
   open,
   onOpenChange,
   members,
-  onComplete
+  onComplete,
+  currency = "INR"
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [customSplitError, setCustomSplitError] = useState<string | null>(null);
@@ -138,7 +140,7 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
       }
     } else if (splitType === 'amount') {
       if (Math.abs(total - amount) > 0.01) {
-        setCustomSplitError(`Amounts must add up to the total expense of $${amount.toFixed(2)}. Current total: $${total.toFixed(2)}`);
+        setCustomSplitError(`Amounts must add up to the total expense of ${getCurrencySymbol(currency)}${amount.toFixed(2)}. Current total: ${getCurrencySymbol(currency)}${total.toFixed(2)}`);
         return false;
       }
     }
@@ -272,7 +274,7 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
                         <FormControl>
                           <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                              $
+                              {getCurrencySymbol(currency)}
                             </span>
                             <Input 
                               type="number"
@@ -471,7 +473,7 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
                             className="mb-3 p-2 bg-gradient-to-r from-blue-500/20 to-purple-600/20 rounded-md"
                           >
                             <p className="text-sm font-medium text-center">
-                              Total expense amount: <span className="font-bold">${amount.toFixed(2)}</span>
+                              Total expense amount: <span className="font-bold">{getCurrencySymbol(currency)}{amount.toFixed(2)}</span>
                             </p>
                           </motion.div>
                         )}
@@ -504,7 +506,7 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
                                   <Input
                                     type="number"
                                     step={splitType === "percentage" ? "0.1" : "0.01"}
-                                    placeholder={splitType === "percentage" ? "0.0%" : "$0.00"}
+                                    placeholder={splitType === "percentage" ? "0.0%" : `${getCurrencySymbol(currency)}0.00`}
                                     className="glass-input w-24 text-right text-sm"
                                     onChange={(e) => {
                                       handleCustomSplitChange(participantId, e.target.value);
@@ -535,12 +537,18 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
                             <span className="text-muted-foreground">
                               {splitType === "percentage" ? "Total Percentage:" : "Total Amount:"}
                             </span>
-                            <span className={splitType === "percentage" 
-                              ? (Math.abs(Object.values(form.getValues('customSplits') || {}).reduce((sum, val) => sum + val, 0) - 100) < 0.01 ? "font-medium text-green-400" : "font-medium text-red-400")
-                              : (Math.abs(Object.values(form.getValues('customSplits') || {}).reduce((sum, val) => sum + val, 0) - amount) < 0.01 ? "font-medium text-green-400" : "font-medium text-red-400")}>
+                            <span className={
+                              splitType === "percentage" 
+                                ? (Math.abs(Object.values(form.getValues('customSplits') || {}).reduce((sum, val) => sum + val, 0) - 100) < 0.01 
+                                    ? "font-medium text-green-400" 
+                                    : "font-medium text-red-400")
+                                : (Math.abs(Object.values(form.getValues('customSplits') || {}).reduce((sum, val) => sum + val, 0) - amount) < 0.01 
+                                    ? "font-medium text-green-400" 
+                                    : "font-medium text-red-400")
+                            }>
                               {splitType === "percentage" 
                                 ? `${Object.values(form.getValues('customSplits') || {}).reduce((sum, val) => sum + val, 0).toFixed(2)}%`
-                                : `$${Object.values(form.getValues('customSplits') || {}).reduce((sum, val) => sum + val, 0).toFixed(2)}`}
+                                : `${getCurrencySymbol(currency)}${Object.values(form.getValues('customSplits') || {}).reduce((sum, val) => sum + val, 0).toFixed(2)}`}
                             </span>
                           </div>
                           <div className="flex justify-between text-sm">
@@ -548,7 +556,7 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
                               {splitType === "percentage" ? "Required:" : "Required:"}
                             </span>
                             <span className="font-medium">
-                              {splitType === "percentage" ? "100%" : `$${amount.toFixed(2)}`}
+                              {splitType === "percentage" ? "100%" : `${getCurrencySymbol(currency)}${amount.toFixed(2)}`}
                             </span>
                           </div>
                         </div>
