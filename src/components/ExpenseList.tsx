@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Expense, Member } from "@/lib/types";
@@ -10,14 +11,26 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { formatCurrency, formatDate, getInitials, getCurrencySymbol } from "@/lib/utils";
-import { PlusCircle, Receipt, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { PlusCircle, Receipt, MoreVertical, Pencil, Trash2, AlertTriangle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import EditExpenseDialog from "@/components/EditExpenseDialog";
+import { useAppStore } from "@/lib/store";
+import { toast } from "sonner";
 
 interface ExpenseListProps {
   expenses: Expense[];
@@ -33,7 +46,9 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
   currency
 }) => {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const removeExpense = useAppStore((state) => state.removeExpense);
   
   // Sort expenses by date, newest first
   const sortedExpenses = [...expenses].sort(
@@ -62,9 +77,21 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
   };
   
   const handleDeleteExpense = (expense: Expense) => {
-    // We'll handle deletion in the edit dialog
-    setEditingExpense(expense);
-    setShowEditDialog(true);
+    setExpenseToDelete(expense);
+  };
+
+  const confirmDeleteExpense = async () => {
+    if (!expenseToDelete) return;
+
+    try {
+      await removeExpense(expenseToDelete.id);
+      toast.success("Expense deleted successfully");
+    } catch (error) {
+      console.error("Error deleting expense:", error);
+      toast.error("Failed to delete expense");
+    } finally {
+      setExpenseToDelete(null);
+    }
   };
   
   if (expenses.length === 0) {
@@ -198,8 +225,33 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
           setEditingExpense(null);
         }}
       />
+
+      <AlertDialog open={!!expenseToDelete} onOpenChange={(open) => !open && setExpenseToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Delete Expense
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the expense "{expenseToDelete?.title}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={confirmDeleteExpense}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
+
 
 export default ExpenseList;

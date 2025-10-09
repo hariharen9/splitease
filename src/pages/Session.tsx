@@ -39,6 +39,9 @@ import { subscribeToSession } from "@/lib/firestore";
 import SettingsDialog from "@/components/SettingsDialog";
 import ActivityTab from "@/components/ActivityTab";
 import ShareSessionDialog from "@/components/ShareSessionDialog";
+import RenameDialog from "@/components/RenameDialog";
+
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SessionPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -48,6 +51,7 @@ const SessionPage = () => {
   const [showAddMember, setShowAddMember] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [showRename, setShowRename] = useState(false);
   const [showAddMemberPrompt, setShowAddMemberPrompt] = useState(false);
 
   const [balances, setBalances] = useState<Record<string, number>>({});
@@ -183,20 +187,17 @@ const SessionPage = () => {
     };
   }, [isFirestoreConnected, isFirestoreAvailable, setFirestoreAvailable]);
 
-  const handleEditTitle = () => {
-    const newTitle = prompt("Enter new session title", sessionTitle);
-    if (newTitle && newTitle.trim() !== "") {
-      updateSessionTitle(newTitle.trim())
-        .then(() => {
-          toast.success("Session title updated");
-        })
-        .catch((error) => {
-          console.error("Error updating session title:", error);
-          toast.error("Failed to update session title");
-        });
-    }
+  const handleRenameSession = (newTitle: string) => {
+    updateSessionTitle(newTitle)
+      .then(() => {
+        toast.success("Session title updated");
+      })
+      .catch((error) => {
+        console.error("Error updating session title:", error);
+        toast.error("Failed to update session title");
+      });
   };
-  
+
   const handleBack = () => {
     navigate("/");
   };
@@ -216,6 +217,45 @@ const SessionPage = () => {
 
   // Calculate total expenses
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+  if (!session) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        {/* Header Skeleton */}
+        <header className="border-b border-white/10">
+          <div className="container max-w-3xl px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-9 w-9 rounded-md" />
+                <div>
+                  <Skeleton className="h-5 w-32 mb-1.5" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-9 w-20 rounded-md" />
+                <Skeleton className="h-9 w-9 rounded-md" />
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content Skeleton */}
+        <main className="flex-1 container max-w-3xl px-4 py-6">
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <Skeleton className="h-24 rounded-lg" />
+            <Skeleton className="h-24 rounded-lg" />
+          </div>
+          <Skeleton className="h-10 w-full mb-6" />
+          <div className="space-y-3">
+            <Skeleton className="h-20 w-full rounded-lg" />
+            <Skeleton className="h-20 w-full rounded-lg" />
+            <Skeleton className="h-20 w-full rounded-lg" />
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -239,7 +279,7 @@ const SessionPage = () => {
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-muted-foreground hover:text-white"
-                    onClick={handleEditTitle}
+                    onClick={() => setShowRename(true)}
                   >
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
@@ -288,7 +328,7 @@ const SessionPage = () => {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Session Options</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleEditTitle}>
+                  <DropdownMenuItem onClick={() => setShowRename(true)}>
                     <Pencil className="mr-2 h-4 w-4" />
                     Rename Session
                   </DropdownMenuItem>
@@ -483,6 +523,20 @@ const SessionPage = () => {
             key="share-dialog"
             open={showShare}
             onOpenChange={setShowShare}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showRename && (
+          <RenameDialog
+            key="rename-dialog"
+            open={showRename}
+            onOpenChange={setShowRename}
+            currentName={sessionTitle}
+            onRename={handleRenameSession}
+            title="Rename Session"
+            description="Enter a new name for this session."
           />
         )}
       </AnimatePresence>
