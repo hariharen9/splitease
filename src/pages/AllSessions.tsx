@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import Logo from "@/components/Logo";
 import SessionCard from "@/components/SessionCard";
 import { useAppStore } from "@/lib/store/index";
 import { toast } from "sonner";
@@ -50,42 +49,66 @@ const AllSessions = () => {
   };
   
   return (
-    <div className="min-h-screen flex flex-col px-4 py-8">
-      <motion.header 
-        className="flex items-center justify-between mb-8"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="flex items-center">
-          <motion.div
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <Button
-              variant="ghost"
-              size="icon"
-              className="mr-2"
-              onClick={() => navigate("/")}
+    <div className="min-h-screen flex flex-col">
+      <header className="border-b border-white/10">
+        <div className="container max-w-3xl px-4 py-3">
+          <div className="flex items-center justify-between">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="flex items-center gap-3"
             >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-          </motion.div>
-          <Logo />
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={() => navigate("/")}
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <img 
+                  src="/logo.png" 
+                  alt="SplitEase Logo" 
+                  className="h-8 w-8 object-contain"
+                />
+              </motion.div>
+              <motion.h1 
+                className="text-lg font-medium"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                All Sessions
+              </motion.h1>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                onClick={() => navigate("/")}
+                className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-all duration-300 text-white shadow-lg hover:shadow-xl"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                New Session
+              </Button>
+            </motion.div>
+          </div>
         </div>
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Button
-            onClick={() => navigate("/")}
-            className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-all duration-300 text-white shadow-lg hover:shadow-xl"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            New Session
-          </Button>
-        </motion.div>
-      </motion.header>
+      </header>
       
       <motion.div
         initial={{ opacity: 0 }}

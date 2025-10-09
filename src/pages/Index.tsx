@@ -14,7 +14,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import Logo from "@/components/Logo";
 import PinInput from "@/components/PinInput";
 import { useAppStore } from "@/lib/store/index";
 import { toast } from "sonner";
@@ -126,7 +125,20 @@ const Index = () => {
         transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
         className="text-center mb-12 relative"
       >
-        <Logo size="lg" className="justify-center mb-6" />
+        <motion.div 
+          className="flex justify-center mb-6"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <img 
+            src="/logo.png" 
+            alt="SplitEase Logo" 
+            className="h-16 w-16 object-contain"
+          />
+        </motion.div>
         
         <motion.h2 
           className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-blue-400 bg-clip-text text-transparent mb-4"
