@@ -83,22 +83,42 @@ const Index = () => {
   
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
-      {/* Animated gradient background */}
-      <motion.div 
-        className="absolute inset-0 -z-20"
-        animate={{
-          background: [
-            "radial-gradient(circle at 10% 20%, rgba(96, 165, 250, 0.1) 0%, transparent 20%), radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 20%)",
-            "radial-gradient(circle at 20% 80%, rgba(96, 165, 250, 0.1) 0%, transparent 20%), radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 20%)",
-            "radial-gradient(circle at 50% 50%, rgba(96, 165, 250, 0.1) 0%, transparent 20%), radial-gradient(circle at 30% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 20%)",
-          ]
-        }}
-        transition={{
-          duration: 10,
-          repeat: Infinity,
-          repeatType: "reverse",
-        }}
-      />
+      {/* Enhanced animated gradient background */}
+      <div className="absolute inset-0 -z-20">
+        <motion.div 
+          className="absolute inset-0"
+          animate={{
+            background: [
+              "radial-gradient(60% 60% at 20% 30%, rgba(96, 165, 250, 0.15) 0%, transparent 50%), radial-gradient(50% 50% at 80% 70%, rgba(139, 92, 246, 0.15) 0%, transparent 50%)",
+              "radial-gradient(50% 50% at 30% 70%, rgba(96, 165, 250, 0.15) 0%, transparent 50%), radial-gradient(60% 60% at 70% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%)",
+              "radial-gradient(70% 70% at 60% 40%, rgba(96, 165, 250, 0.15) 0%, transparent 50%), radial-gradient(40% 40% at 20% 60%, rgba(139, 92, 246, 0.15) 0%, transparent 50%)",
+              "radial-gradient(60% 60% at 20% 30%, rgba(96, 165, 250, 0.15) 0%, transparent 50%), radial-gradient(50% 50% at 80% 70%, rgba(139, 92, 246, 0.15) 0%, transparent 50%)",
+            ]
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            repeatType: "loop",
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div 
+          className="absolute inset-0"
+          animate={{
+            background: [
+              "radial-gradient(40% 40% at 10% 10%, rgba(59, 130, 246, 0.1) 0%, transparent 60%), radial-gradient(30% 30% at 90% 90%, rgba(124, 58, 237, 0.1) 0%, transparent 60%)",
+              "radial-gradient(35% 35% at 90% 10%, rgba(59, 130, 246, 0.1) 0%, transparent 60%), radial-gradient(45% 45% at 10% 90%, rgba(124, 58, 237, 0.1) 0%, transparent 60%)",
+              "radial-gradient(40% 40% at 10% 10%, rgba(59, 130, 246, 0.1) 0%, transparent 60%), radial-gradient(30% 30% at 90% 90%, rgba(124, 58, 237, 0.1) 0%, transparent 60%)",
+            ]
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            repeatType: "loop",
+            ease: "easeInOut"
+          }}
+        />
+      </div>
       
       <motion.div
         initial={{ opacity: 0, y: -50 }}
@@ -109,10 +129,24 @@ const Index = () => {
         <Logo size="lg" className="justify-center mb-6" />
         
         <motion.h2 
-          className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-4"
+          className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-blue-400 bg-clip-text text-transparent mb-4"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
+          animate={{ 
+            opacity: 1,
+            backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
+          }}
+          transition={{ 
+            opacity: { delay: 0.3 },
+            backgroundPosition: {
+              duration: 8,
+              repeat: Infinity,
+              repeatType: "loop",
+              ease: "easeInOut"
+            }
+          }}
+          style={{
+            backgroundSize: "200% 200%",
+          }}
         >
           Split Expenses Effortlessly
         </motion.h2>
@@ -133,18 +167,70 @@ const Index = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
         >
-          <div className="flex items-center gap-2 bg-blue-500/10 px-3 py-1.5 rounded-full">
-            <Sparkles className="h-4 w-4 text-blue-400" />
+          <motion.div 
+            className="flex items-center gap-2 bg-blue-500/10 px-3 py-1.5 rounded-full"
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
+            <motion.div
+              animate={{ 
+                rotate: [0, 10, -10, 0],
+              }}
+              transition={{ 
+                duration: 4,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut"
+              }}
+            >
+              <Sparkles className="h-4 w-4 text-blue-400" />
+            </motion.div>
             <span className="text-sm">No Signup Required</span>
-          </div>
-          <div className="flex items-center gap-2 bg-purple-500/10 px-3 py-1.5 rounded-full">
-            <Zap className="h-4 w-4 text-purple-400" />
+          </motion.div>
+          
+          <motion.div 
+            className="flex items-center gap-2 bg-purple-500/10 px-3 py-1.5 rounded-full"
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
+            <motion.div
+              animate={{ 
+                scale: [1, 1.1, 1],
+              }}
+              transition={{ 
+                duration: 3,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut"
+              }}
+            >
+              <Zap className="h-4 w-4 text-purple-400" />
+            </motion.div>
             <span className="text-sm">Real-time Sync</span>
-          </div>
-          <div className="flex items-center gap-2 bg-indigo-500/10 px-3 py-1.5 rounded-full">
-            <Share2 className="h-4 w-4 text-indigo-400" />
+          </motion.div>
+          
+          <motion.div 
+            className="flex items-center gap-2 bg-indigo-500/10 px-3 py-1.5 rounded-full"
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
+            <motion.div
+              animate={{ 
+                x: [0, 2, -2, 0],
+              }}
+              transition={{ 
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <Share2 className="h-4 w-4 text-indigo-400" />
+            </motion.div>
             <span className="text-sm">Share via PIN</span>
-          </div>
+          </motion.div>
         </motion.div>
       </motion.div>
 
@@ -287,12 +373,30 @@ const Index = () => {
                 transition={{ delay: 1.3 + index * 0.1 }}
                 whileHover={{ y: -5, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="glass-panel border-white/10 p-4 rounded-xl cursor-pointer"
+                className="glass-panel border-white/10 p-4 rounded-xl cursor-pointer relative overflow-hidden"
                 onClick={() => {
                   setCurrentSessionId(session.id);
                   navigate(`/session/${session.id}`);
                 }}
               >
+                {/* Subtle background animation for each card */}
+                <motion.div
+                  className="absolute inset-0 -z-10"
+                  animate={{
+                    background: [
+                      "radial-gradient(circle at 20% 30%, rgba(96, 165, 250, 0.05) 0%, transparent 50%)",
+                      "radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.05) 0%, transparent 50%)",
+                      "radial-gradient(circle at 20% 30%, rgba(96, 165, 250, 0.05) 0%, transparent 50%)",
+                    ]
+                  }}
+                  transition={{
+                    duration: 10,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                    ease: "easeInOut"
+                  }}
+                />
+                
                 <div className="flex justify-between items-start">
                   <div>
                     <h4 className="font-semibold truncate">{session.title}</h4>

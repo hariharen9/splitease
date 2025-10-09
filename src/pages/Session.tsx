@@ -489,23 +489,46 @@ const SessionPage = () => {
             </Card>
           </motion.div>
           <motion.div
-            whileHover={{ y: -5 }}
+            whileHover={{ y: -5, scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            className="cursor-pointer"
+            onClick={() => setShowAddMember(true)}
           >
-            <Card className="glass-panel border-white/10">
-              <CardContent className="p-4">
+            <Card className="glass-panel border-white/10 hover:border-white/20 transition-all duration-300 relative overflow-hidden">
+              {/* Subtle pulse animation */}
+              <motion.div
+                className="absolute inset-0 rounded-lg"
+                animate={{
+                  boxShadow: [
+                    "0 0 0 0 rgba(96, 165, 250, 0.1)",
+                    "0 0 0 4px rgba(96, 165, 250, 0.2)",
+                    "0 0 0 8px rgba(96, 165, 250, 0.0)",
+                    "0 0 0 0 rgba(96, 165, 250, 0.0)"
+                  ]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+              <CardContent className="p-4 relative z-10">
                 <div className="flex flex-col">
-                  <span className="text-muted-foreground text-sm">Members</span>
+                  <span className="text-muted-foreground text-sm flex items-center gap-1">
+                    <Users className="h-4 w-4" />
+                    Members
+                  </span>
                   <div className="flex items-center gap-1 mt-1">
                     <div className="flex -space-x-2 overflow-hidden">
                       {members.slice(0, 3).map((member, index) => (
                         <motion.div
                           key={member.id}
-                          className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium text-white"
+                          className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium text-white border-2 border-background"
                           style={{ backgroundColor: member.avatarColor }}
                           initial={{ scale: 0, rotate: 180 }}
                           animate={{ scale: 1, rotate: 0 }}
                           transition={{ delay: 0.5 + index * 0.1, type: "spring" }}
+                          whileHover={{ scale: 1.2, zIndex: 10 }}
                         >
                           {getInitials(member.name)}
                         </motion.div>
