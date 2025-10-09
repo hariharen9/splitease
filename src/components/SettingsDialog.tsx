@@ -215,7 +215,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
           <Button variant="outline" onClick={() => onOpenChange(false)} className="glass-input border-white/10">
             Cancel
           </Button>
-          <Button onClick={handleSave} className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity">
+          <Button onClick={handleSave} className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-white">
             Save
           </Button>
         </DialogFooter>

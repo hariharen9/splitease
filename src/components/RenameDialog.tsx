@@ -60,7 +60,7 @@ const RenameDialog: React.FC<RenameDialogProps> = ({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button onClick={handleSave}>Save</Button>
+            <Button onClick={handleSave} className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-white">Save</Button>
           </DialogFooter>
         </div>
       </ResponsiveDialogContent>

@@ -132,7 +132,7 @@ const Index = () => {
               </CardContent>
               <CardFooter>
                 <Button 
-                  className="w-full bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity"
+                  className="w-full bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-white"
                   onClick={handleCreateSession}
                   disabled={isCreating}
                 >

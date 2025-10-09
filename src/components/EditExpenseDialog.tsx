@@ -456,7 +456,7 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                     <Button 
                       type="submit" 
                       disabled={isSubmitting}
-                      className="w-full bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity"
+                      className="w-full bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-white"
                     >
                       {isSubmitting ? "Updating..." : "Update"}
                     </Button>

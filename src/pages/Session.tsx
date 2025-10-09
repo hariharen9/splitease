@@ -40,6 +40,7 @@ import SettingsDialog from "@/components/SettingsDialog";
 import ActivityTab from "@/components/ActivityTab";
 import ShareSessionDialog from "@/components/ShareSessionDialog";
 import RenameDialog from "@/components/RenameDialog";
+import Footer from "@/components/Footer";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -472,14 +473,21 @@ const SessionPage = () => {
       </main>
 
       {/* Add Expense Button */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2">
-        <Button
-          onClick={() => setShowAddExpense(true)}
-          className="h-14 px-6 rounded-xl bg-gradient-to-r from-gradient-start to-gradient-end shadow-lg hover:opacity-90 transition-opacity flex items-center gap-2 text-white"
+      <div className="fixed bottom-20 w-full flex justify-center z-20">
+        <motion.div
+          initial={{ scale: 0, y: 100 }}
+          animate={{ scale: 1, y: 0 }}
+          exit={{ scale: 0, y: 100 }}
+          transition={{ type: "spring", stiffness: 260, damping: 20 }}
         >
-          <Plus className="h-6 w-6" />
-          <span className="text-lg">Add Expense</span>
-        </Button>
+          <Button
+            onClick={() => setShowAddExpense(true)}
+            className="h-12 px-5 rounded-full bg-gradient-to-r from-gradient-start to-gradient-end shadow-lg hover:opacity-90 transition-opacity flex items-center gap-2 text-white"
+          >
+            <Plus className="h-5 w-5" />
+            <span className="text-base">Add Expense</span>
+          </Button>
+        </motion.div>
       </div>
 
       {/* Dialogs - Using AnimatePresence for smoother transitions */}
@@ -540,6 +548,7 @@ const SessionPage = () => {
           />
         )}
       </AnimatePresence>
+      <Footer />
     </div>
   );
 };

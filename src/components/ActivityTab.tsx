@@ -58,7 +58,7 @@ const ActivityTab: React.FC<ActivityTabProps> = ({ activities }) => {
   };
 
   return (
-    <ScrollArea className="h-[calc(100vh-200px)]">
+    <ScrollArea>
       <div className="space-y-4 pr-4">
         {sortedActivities.length === 0 ? (
           <Card className="glass-panel border-white/10">

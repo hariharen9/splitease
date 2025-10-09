@@ -104,7 +104,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
         <p className="text-muted-foreground mb-6 text-center max-w-xs">
           Start tracking expenses by adding your first expense
         </p>
-        <Button onClick={onAddExpense}>
+        <Button onClick={onAddExpense} className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-white">
           <PlusCircle className="mr-2 h-4 w-4" />
           Add an Expense
         </Button>

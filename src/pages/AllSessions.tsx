@@ -63,9 +63,7 @@ const AllSessions = () => {
           </Button>
           <Logo />
         </div>
-        <Button
-          onClick={() => navigate("/")}
-          className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity"
+          className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-white"
         >
           <Plus className="mr-2 h-4 w-4" />
           New Session
@@ -86,7 +84,7 @@ const AllSessions = () => {
           </p>
           <Button 
             onClick={() => navigate("/")}
-            className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity"
+            className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-white"
           >
             <Plus className="mr-2 h-4 w-4" />
             Create Your First Session

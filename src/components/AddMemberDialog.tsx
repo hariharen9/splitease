@@ -160,7 +160,7 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                 <Button
                   onClick={handleAddMember}
                   disabled={isSubmitting || !newMemberName.trim()}
-                  className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity"
+                  className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-white"
                 >
                   <UserPlus className="h-4 w-4" />
                 </Button>
@@ -216,8 +216,9 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
           
           <div className="p-4 sm:p-0">
             <Button
+              variant="outline"
               onClick={handleClose}
-              className="w-full bg-primary/80 hover:bg-primary transition-colors"
+              className="w-full"
             >
               Done
             </Button>
