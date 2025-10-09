@@ -473,16 +473,18 @@ const SessionPage = () => {
       </main>
 
       {/* Add Expense Button */}
-      <div className="fixed bottom-20 w-full flex justify-center z-20">
+      <div className="fixed bottom-16 w-full flex justify-center z-20">
         <motion.div
           initial={{ scale: 0, y: 100 }}
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0, y: 100 }}
-          transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           <Button
             onClick={() => setShowAddExpense(true)}
-            className="h-12 px-5 rounded-full bg-gradient-to-r from-gradient-start to-gradient-end shadow-lg hover:opacity-90 transition-opacity flex items-center gap-2 text-white"
+            className="h-12 px-5 rounded-full bg-white/10 backdrop-blur-lg border shadow-lg hover:bg-white/20 transition-all flex items-center gap-2 text-white"
           >
             <Plus className="h-5 w-5" />
             <span className="text-base">Add Expense</span>
