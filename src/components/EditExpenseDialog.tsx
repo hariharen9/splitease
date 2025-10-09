@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { useForm, useWatch } from "react-hook-form";
 import {
   ResponsiveDialog,
@@ -32,7 +33,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon, Trash2 } from "lucide-react";
+import { CalendarIcon, Trash2, Edit, DollarSign, Tag, User, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Member, SplitType, Expense } from "@/lib/types";
 import { useAppStore } from "@/lib/store/index";
@@ -187,337 +188,415 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
   return (
     <>
       <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-        <ResponsiveDialogContent className="sm:max-w-lg">
-          <ResponsiveDialogHeader>
-            <ResponsiveDialogTitle>Edit Expense</ResponsiveDialogTitle>
-            <ResponsiveDialogDescription>
-              Modify the details of this expense
-            </ResponsiveDialogDescription>
-          </ResponsiveDialogHeader>
-          
-          <div className="px-4 sm:px-0">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  rules={{ required: "Title is required" }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Title</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Dinner, Groceries, etc." 
-                          className="glass-input"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="amount"
-                  rules={{ 
-                    required: "Amount is required",
-                    min: { value: 0.01, message: "Amount must be greater than 0" }
-                  }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Amount</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                            $
-                          </span>
-                          <Input 
-                            type="number"
-                            step="0.01"
-                            className="glass-input pl-7" 
-                            placeholder="0.00"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
-                        </div>
-                      </FormControl>
-                      
-                                          <FormMessage />
-                                        </FormItem>
-                                      )}
-                                    />
-                      
-                                    <FormField
-                                      control={form.control}
-                                      name="categoryId"
-                                      render={({ field }) => (
-                                        <FormItem>
-                                          <FormLabel>Category</FormLabel>
-                                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <FormControl>
-                                              <SelectTrigger className="glass-input">
-                                                <SelectValue placeholder="Select a category" />
-                                              </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                              {categories.map((category) => (
-                                                <SelectItem key={category.id} value={category.id}>
-                                                  <span className="flex items-center">
-                                                    <span className="mr-2">{category.icon}</span>
-                                                    <span>{category.name}</span>
-                                                  </span>
-                                                </SelectItem>
-                                              ))}
-                                            </SelectContent>
-                                          </Select>
-                                          <FormMessage />
-                                        </FormItem>
-                                      )}
-                                    />
-                                    
-                                    <div className="grid grid-cols-2 gap-4">
-                      
-                  <FormField
-                    control={form.control}
-                    name="paidBy"
-                    rules={{ required: "Payer is required" }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Paid By</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+        >
+          <ResponsiveDialogContent className="sm:max-w-lg">
+            <motion.div
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+            >
+              <ResponsiveDialogHeader>
+                <div className="flex items-center gap-2">
+                  <motion.div
+                    className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <Edit className="h-5 w-5 text-white" />
+                  </motion.div>
+                  <div>
+                    <ResponsiveDialogTitle>Edit Expense</ResponsiveDialogTitle>
+                    <ResponsiveDialogDescription>
+                      Modify the details of this expense
+                    </ResponsiveDialogDescription>
+                  </div>
+                </div>
+              </ResponsiveDialogHeader>
+            </motion.div>
+            
+            <motion.div
+              className="px-4 sm:px-0"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <motion.div
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      rules={{ required: "Title is required" }}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <Tag className="h-4 w-4" />
+                            Title
+                          </FormLabel>
                           <FormControl>
-                            <SelectTrigger className="glass-input">
-                              <SelectValue placeholder="Select payer" />
-                            </SelectTrigger>
+                            <Input 
+                              placeholder="Dinner, Groceries, etc." 
+                              className="glass-input"
+                              {...field} 
+                            />
                           </FormControl>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Members</SelectLabel>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </motion.div>
+                  
+                  <motion.div
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <FormField
+                      control={form.control}
+                      name="amount"
+                      rules={{ 
+                        required: "Amount is required",
+                        min: { value: 0.01, message: "Amount must be greater than 0" }
+                      }}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <DollarSign className="h-4 w-4" />
+                            Amount
+                          </FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                $
+                              </span>
+                              <Input 
+                                type="number"
+                                step="0.01"
+                                className="glass-input pl-7" 
+                                placeholder="0.00"
+                                {...field}
+                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </motion.div>
+                  
+                  <motion.div
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <FormField
+                      control={form.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel className="flex items-center gap-2">
+                            <CalendarIcon className="h-4 w-4" />
+                            Date
+                          </FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "glass-input pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? (
+                                    format(field.value, "PPP")
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                disabled={(date) =>
+                                  date > new Date() || date < new Date("1900-01-01")
+                                }
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </motion.div>
+                  
+                  <motion.div
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                  >
+                    <FormField
+                      control={form.control}
+                      name="paidBy"
+                      rules={{ required: "Please select who paid" }}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            Paid By
+                          </FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="glass-input">
+                                <SelectValue placeholder="Select payer" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
                               {members.map((member) => (
                                 <SelectItem key={member.id} value={member.id}>
                                   {member.name}
                                 </SelectItem>
                               ))}
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </motion.div>
                   
-                  <FormField
-                    control={form.control}
-                    name="date"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Date</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "glass-input pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value ? (
-                                  format(field.value, "PPP")
-                                ) : (
-                                  <span>Pick a date</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0 bg-card" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <FormField
-                  control={form.control}
-                  name="split"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Split Type</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="glass-input">
-                            <SelectValue placeholder="How to split the expense" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="equal">Equal Split</SelectItem>
-                          <SelectItem value="percentage">By Percentage</SelectItem>
-                          <SelectItem value="amount">By Amount</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="participants"
-                  render={() => (
-                    <FormItem>
-                      <div className="mb-2">
-                        <FormLabel>Participants</FormLabel>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        {members.map((member) => (
-                          <FormField
-                            key={member.id}
-                            control={form.control}
-                            name="participants"
-                            render={({ field }) => {
-                              return (
-                                <FormItem
-                                  className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-2 glass-input"
-                                >
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(member.id)}
-                                      onCheckedChange={(checked) => {
-                                        return checked
-                                          ? field.onChange([...field.value, member.id])
-                                          : field.onChange(
-                                              field.value?.filter(
-                                                (value) => value !== member.id
-                                              )
-                                            );
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="font-normal cursor-pointer">
-                                    {member.name}
-                                  </FormLabel>
-                                </FormItem>
-                              );
-                            }}
-                          />
-                        ))}
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {splitType !== 'equal' && participants.length > 0 && (
-                  <div className="space-y-4 rounded-md p-4 glass-input">
-                    <h4 className="font-medium">
-                      Split by {splitType === 'percentage' ? 'Percentage' : 'Amount'}
-                    </h4>
-                    <div className="space-y-2">
-                      {members
-                        .filter(m => participants.includes(m.id))
-                        .map(member => (
-                          <div key={member.id} className="flex items-center gap-2">
-                            <Label className="w-1/2">{member.name}</Label>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              className="glass-input"
-                              placeholder={splitType === 'percentage' ? '%' : '$'}
-                              value={form.getValues('customSplits')?.[member.id] || ''}
-                              onChange={(e) => handleCustomSplitChange(member.id, e.target.value)}
-                            />
-                          </div>
-                        ))}
-                    </div>
-                    {customSplitError && <p className="text-sm text-red-500">{customSplitError}</p>}
-                  </div>
-                )}
-                
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description (Optional)</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Add details about this expense..." 
-                          className="glass-input resize-none"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={() => setShowDeleteDialog(true)}
-                    className="w-full"
+                  <motion.div
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.7 }}
                   >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                  </Button>
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        Participants
+                      </FormLabel>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {members.map((member) => (
+                          <motion.div
+                            key={member.id}
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.97 }}
+                          >
+                            <FormField
+                              control={form.control}
+                              name="participants"
+                              render={({ field }) => {
+                                return (
+                                  <Checkbox
+                                    checked={field.value?.includes(member.id)}
+                                    onCheckedChange={(checked) => {
+                                      return checked
+                                        ? field.onChange([...field.value, member.id])
+                                        : field.onChange(
+                                            field.value?.filter(
+                                              (value) => value !== member.id
+                                            )
+                                          );
+                                    }}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <div
+                                        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white"
+                                        style={{ backgroundColor: member.avatarColor }}
+                                      >
+                                        {member.name.charAt(0)}
+                                      </div>
+                                      <span className="text-sm truncate">{member.name}</span>
+                                    </div>
+                                  </Checkbox>
+                                );
+                              }}
+                            />
+                          </motion.div>
+                        ))}
+                      </div>
+                    </FormItem>
+                  </motion.div>
+                  
+                  <motion.div
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.8 }}
+                  >
+                    <FormField
+                      control={form.control}
+                      name="split"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Split Type</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="glass-input">
+                                <SelectValue placeholder="Select split type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectGroup>
+                                <SelectLabel>Split Options</SelectLabel>
+                                <SelectItem value="equal">Equal Split</SelectItem>
+                                <SelectItem value="percentage">Percentage Split</SelectItem>
+                                <SelectItem value="amount">Custom Amount Split</SelectItem>
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </motion.div>
+                  
+                  <motion.div
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.9 }}
+                  >
+                    <FormField
+                      control={form.control}
+                      name="categoryId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Category</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="glass-input">
+                                <SelectValue placeholder="Select category" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectGroup>
+                                <SelectLabel>Categories</SelectLabel>
+                                {categories.map((category) => (
+                                  <SelectItem key={category.id} value={category.id}>
+                                    <div className="flex items-center gap-2">
+                                      <span>{category.icon}</span>
+                                      <span>{category.name}</span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </motion.div>
+                  
+                  <motion.div
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 1.0 }}
+                  >
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Add any details about this expense..."
+                              className="glass-input resize-none"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </motion.div>
+                  
                   <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => onOpenChange(false)}
-                      className="w-full"
+                    <motion.div
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 1.1 }}
+                      className="flex-1"
                     >
-                      Cancel
-                    </Button>
-                    <Button 
-                      type="submit" 
-                      disabled={isSubmitting}
-                      className="w-full bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-white"
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? (
+                          <motion.span
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="inline-block mr-2"
+                          >
+                            ↻
+                          </motion.span>
+                        ) : null}
+                        {isSubmitting ? "Updating..." : "Update Expense"}
+                      </Button>
+                    </motion.div>
+                    
+                    <motion.div
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 1.2 }}
                     >
-                      {isSubmitting ? "Updating..." : "Update"}
-                    </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => setShowDeleteDialog(true)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </motion.div>
                   </div>
-                </div>
-              </form>
-            </Form>
-          </div>
-        </ResponsiveDialogContent>
+                </form>
+              </Form>
+            </motion.div>
+          </ResponsiveDialogContent>
+        </motion.div>
       </ResponsiveDialog>
       
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the expense "{expense.title}".
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteExpense}
-              className="bg-destructive hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          >
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this expense? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDeleteExpense}
+                className="bg-red-500 hover:bg-red-600"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </motion.div>
         </AlertDialogContent>
       </AlertDialog>
     </>

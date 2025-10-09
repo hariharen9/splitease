@@ -23,6 +23,8 @@ import { AlertTriangle, Trash2 } from "lucide-react";
 import { useAppStore } from "@/lib/store/index";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import * as firestoreService from "@/lib/firestore";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -41,7 +43,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
   open,
   onOpenChange,
 }) => {
-  const { getCurrentSession, updateCurrency, deleteSession } = useAppStore();
+  const { getCurrentSession, deleteSession } = useAppStore();
   const session = getCurrentSession();
   const [selectedCurrency, setSelectedCurrency] = useState(session?.currency || "INR");
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -49,11 +51,27 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
   const [sessionTitleInput, setSessionTitleInput] = useState("");
   const navigate = useNavigate();
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (session) {
-      updateCurrency(selectedCurrency);
-      toast.success("Currency updated successfully");
-      onOpenChange(false);
+      // Update currency in local state and Firestore
+      try {
+        if (useAppStore.getState().isFirestoreConnected && session.pin) {
+          await firestoreService.updateSessionCurrency(session.pin, selectedCurrency);
+        }
+        
+        // Update local state
+        useAppStore.setState((state) => ({
+          sessions: state.sessions.map((s) =>
+            s.id === session.id ? { ...s, currency: selectedCurrency } : s
+          ),
+        }));
+        
+        toast.success("Currency updated successfully");
+        onOpenChange(false);
+      } catch (error) {
+        console.error("Error updating currency:", error);
+        toast.error("Failed to update currency");
+      }
     }
   };
 
@@ -99,68 +117,106 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
     return (
       <Dialog open={open} onOpenChange={handleCancelDelete}>
         <DialogContent className="glass-panel border-white/10 sm:max-w-[400px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-destructive">
-              <AlertTriangle className="h-5 w-5" />
-              Delete Session
-            </DialogTitle>
-            {deleteStep === 1 ? (
-              <DialogDescription>
-                This action cannot be undone. This will permanently delete your session and remove all associated data.
-              </DialogDescription>
-            ) : (
-              <DialogDescription>
-                To confirm, please type the session name: <span className="font-semibold">{session?.title}</span>
-              </DialogDescription>
-            )}
-          </DialogHeader>
-          
-          <div className="py-4">
-            {deleteStep === 1 ? (
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Warning</AlertTitle>
-                <AlertDescription>
-                  You are about to permanently delete:
-                  <ul className="list-disc pl-5 mt-2 space-y-1">
-                    <li>Session: {session?.title}</li>
-                    <li>All expenses and transactions</li>
-                    <li>All member information</li>
-                    <li>All balance calculations</li>
-                  </ul>
-                  <p className="mt-2 font-semibold">This action cannot be undone.</p>
-                </AlertDescription>
-              </Alert>
-            ) : (
-              <div className="space-y-2">
-                <Label htmlFor="sessionTitle">Session Name</Label>
-                <input
-                  id="sessionTitle"
-                  value={sessionTitleInput}
-                  onChange={(e) => setSessionTitleInput(e.target.value)}
-                  placeholder="Type session name to confirm"
-                  className="glass-input w-full px-3 py-2 rounded-md border"
-                  autoFocus
-                />
-                <p className="text-sm text-muted-foreground">
-                  Type the exact session name to confirm deletion
-                </p>
-              </div>
-            )}
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={handleCancelDelete} className="glass-input border-white/10">
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleProceedToDelete} 
-              className="bg-destructive hover:bg-destructive/90"
-              disabled={deleteStep === 2 && sessionTitleInput !== session?.title}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-destructive">
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
+                >
+                  <AlertTriangle className="h-5 w-5" />
+                </motion.div>
+                Delete Session
+              </DialogTitle>
+              {deleteStep === 1 ? (
+                <DialogDescription>
+                  This action cannot be undone. This will permanently delete your session and remove all associated data.
+                </DialogDescription>
+              ) : (
+                <DialogDescription>
+                  To confirm, please type the session name: <span className="font-semibold">{session?.title}</span>
+                </DialogDescription>
+              )}
+            </DialogHeader>
+            
+            <motion.div 
+              className="py-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1 }}
             >
-              {deleteStep === 1 ? "Continue" : "Delete Session"}
-            </Button>
-          </DialogFooter>
+              {deleteStep === 1 ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Warning</AlertTitle>
+                    <AlertDescription>
+                      You are about to permanently delete:
+                      <ul className="list-disc pl-5 mt-2 space-y-1">
+                        <li>Session: {session?.title}</li>
+                        <li>All expenses and transactions</li>
+                        <li>All member information</li>
+                        <li>All balance calculations</li>
+                      </ul>
+                      <p className="mt-2 font-semibold">This action cannot be undone.</p>
+                    </AlertDescription>
+                  </Alert>
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-2"
+                >
+                  <Label htmlFor="sessionTitle">Session Name</Label>
+                  <input
+                    id="sessionTitle"
+                    value={sessionTitleInput}
+                    onChange={(e) => setSessionTitleInput(e.target.value)}
+                    placeholder="Type session name to confirm"
+                    className="glass-input w-full px-3 py-2 rounded-md border transition-all duration-300 focus:ring-2 focus:ring-destructive/50"
+                    autoFocus
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Type the exact session name to confirm deletion
+                  </p>
+                </motion.div>
+              )}
+            </motion.div>
+            
+            <DialogFooter>
+              <motion.div
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button variant="outline" onClick={handleCancelDelete} className="glass-input border-white/10 transition-all duration-200">
+                  Cancel
+                </Button>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button 
+                  onClick={handleProceedToDelete} 
+                  className="bg-destructive hover:bg-destructive/90 transition-all duration-300"
+                  disabled={deleteStep === 2 && sessionTitleInput !== session?.title}
+                >
+                  {deleteStep === 1 ? "Continue" : "Delete Session"}
+                </Button>
+              </motion.div>
+            </DialogFooter>
+          </motion.div>
         </DialogContent>
       </Dialog>
     );
@@ -169,56 +225,111 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="glass-panel border-white/10 sm:max-w-[400px]">
-        <DialogHeader>
-          <DialogTitle>Settings</DialogTitle>
-          <DialogDescription>
-            Customize your session settings
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="currency">Currency</Label>
-            <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
-              <SelectTrigger className="glass-input">
-                <SelectValue placeholder="Select a currency" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Currencies</SelectLabel>
-                  {currencies.map((currency) => (
-                    <SelectItem key={currency.value} value={currency.value}>
-                      {currency.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+        >
+          <DialogHeader>
+            <DialogTitle>Settings</DialogTitle>
+            <DialogDescription>
+              Customize your session settings
+            </DialogDescription>
+          </DialogHeader>
           
-          <div className="pt-4 border-t border-white/10">
-            <Button 
-              variant="destructive" 
-              className="w-full flex items-center gap-2"
-              onClick={handleDeleteClick}
+          <motion.div 
+            className="space-y-4 py-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1 }}
+          >
+            <motion.div 
+              className="space-y-2"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
             >
-              <Trash2 className="h-4 w-4" />
-              Delete Session
-            </Button>
-            <p className="text-xs text-muted-foreground mt-2 text-center">
-              Permanently delete this session and all its data
-            </p>
-          </div>
-        </div>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="glass-input border-white/10">
-            Cancel
-          </Button>
-          <Button onClick={handleSave} className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-white">
-            Save
-          </Button>
-        </DialogFooter>
+              <Label htmlFor="currency">Currency</Label>
+              <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <SelectTrigger className="glass-input transition-all duration-300 hover:border-primary/50">
+                    <SelectValue placeholder="Select a currency" />
+                  </SelectTrigger>
+                </motion.div>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Currencies</SelectLabel>
+                    <AnimatePresence>
+                      {currencies.map((currency, index) => (
+                        <motion.div
+                          key={currency.value}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.2, delay: index * 0.05 }}
+                        >
+                          <SelectItem value={currency.value}>
+                            {currency.label}
+                          </SelectItem>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </motion.div>
+            
+            <motion.div 
+              className="pt-4 border-t border-white/10"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button 
+                  variant="destructive" 
+                  className="w-full flex items-center gap-2 transition-all duration-300 hover:shadow-lg hover:shadow-destructive/20"
+                  onClick={handleDeleteClick}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete Session
+                </Button>
+              </motion.div>
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                Permanently delete this session and all its data
+              </p>
+            </motion.div>
+          </motion.div>
+          
+          <DialogFooter>
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button variant="outline" onClick={() => onOpenChange(false)} className="glass-input border-white/10 transition-all duration-200">
+                Cancel
+              </Button>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button 
+                onClick={handleSave} 
+                className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-all duration-300 text-white"
+              >
+                Save
+              </Button>
+            </motion.div>
+          </DialogFooter>
+        </motion.div>
       </DialogContent>
     </Dialog>
   );

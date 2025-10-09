@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { 
   ChevronLeft, 
@@ -51,85 +51,152 @@ const AllSessions = () => {
   
   return (
     <div className="min-h-screen flex flex-col px-4 py-8">
-      <header className="flex items-center justify-between mb-8">
+      <motion.header 
+        className="flex items-center justify-between mb-8"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="flex items-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="mr-2"
-            onClick={() => navigate("/")}
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
           >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="mr-2"
+              onClick={() => navigate("/")}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+          </motion.div>
           <Logo />
         </div>
-        <Button
-          onClick={() => navigate("/")}
-          className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-white"
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
-          <Plus className="mr-2 h-4 w-4" />
-          New Session
-        </Button>
-      </header>
-      
-      <div className="mb-6">
-        <div className="flex items-center mb-4">
-          <h2 className="text-2xl font-semibold">Your Past Sessions</h2>
-          <Separator className="flex-1 ml-4" />
-        </div>
-      </div>
-      
-      {sessions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12">
-          <p className="text-muted-foreground mb-6">
-            You don't have any sessions yet
-          </p>
-          <Button 
+          <Button
             onClick={() => navigate("/")}
-            className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-white"
+            className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-all duration-300 text-white shadow-lg hover:shadow-xl"
           >
             <Plus className="mr-2 h-4 w-4" />
-            Create Your First Session
+            New Session
           </Button>
-        </div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-4"
-        >
-          {sessions.map((session) => (
-            <SessionCard
-              key={session.id}
-              session={session}
-              onSelect={handleSelectSession}
-              onDelete={handleDeleteSession}
-            />
-          ))}
         </motion.div>
-      )}
+      </motion.header>
+      
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+      >
+        <div className="mb-6">
+          <div className="flex items-center mb-4">
+            <motion.h2 
+              className="text-2xl font-semibold"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              Your Past Sessions
+            </motion.h2>
+            <Separator className="flex-1 ml-4" />
+          </div>
+        </div>
+      </motion.div>
+      
+      <AnimatePresence>
+        {sessions.length === 0 ? (
+          <motion.div
+            className="flex flex-col items-center justify-center py-12"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.3 }}
+          >
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <p className="text-muted-foreground mb-6 text-lg">
+                You don't have any sessions yet
+              </p>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button 
+                onClick={() => navigate("/")}
+                className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-all duration-300 text-white shadow-lg hover:shadow-xl"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Create Your First Session
+              </Button>
+            </motion.div>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
+            <AnimatePresence>
+              {sessions.map((session, index) => (
+                <motion.div
+                  key={session.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                >
+                  <SessionCard
+                    session={session}
+                    onSelect={handleSelectSession}
+                    onDelete={handleDeleteSession}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       <AlertDialog open={!!sessionToDelete} onOpenChange={(open) => !open && setSessionToDelete(null)}>
         <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
-              Delete Session
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this session? This action cannot be undone. All expenses and member data in this session will be permanently removed.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              className="bg-destructive hover:bg-destructive/90"
-              onClick={confirmDeleteSession}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.2 }}
+          >
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 0.5, repeat: Infinity }}
+                >
+                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                </motion.div>
+                Delete Session
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this session? This action cannot be undone. All expenses and member data in this session will be permanently removed.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                className="bg-destructive hover:bg-destructive/90 transition-all duration-300"
+                onClick={confirmDeleteSession}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </motion.div>
         </AlertDialogContent>
       </AlertDialog>
     </div>

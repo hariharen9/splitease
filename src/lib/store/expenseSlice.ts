@@ -1,4 +1,3 @@
-
 import { StateCreator } from 'zustand';
 import { Expense } from '../types';
 import { generateId } from '../utils';
@@ -52,6 +51,18 @@ export const createExpenseSlice: StateCreator<
       );
       set({ sessions });
     }
+    
+    // Add activity for expense addition
+    const payer = session.members.find(m => m.id === expense.paidBy);
+    await get().addActivity({
+      type: 'expense_added',
+      description: `${payer?.name || 'Someone'} added expense "${expense.title}"`,
+      details: {
+        expense: newExpense,
+        participantsCount: expense.participants.length,
+        payerName: payer?.name
+      }
+    });
   },
   removeExpense: async (id) => {
     const currentSessionId = get().currentSessionId;
@@ -62,6 +73,7 @@ export const createExpenseSlice: StateCreator<
     const session = get().getCurrentSession();
     if (!session) return;
 
+    const expenseToRemove = session.expenses.find(e => e.id === id);
     const updatedExpenses = session.expenses.filter((e) => e.id !== id);
 
     if (useAppStore.getState().isFirestoreConnected && currentPin) {
@@ -77,6 +89,19 @@ export const createExpenseSlice: StateCreator<
       );
       set({ sessions });
     }
+    
+    // Add activity for expense removal
+    if (expenseToRemove) {
+      const payer = session.members.find(m => m.id === expenseToRemove.paidBy);
+      await get().addActivity({
+        type: 'expense_removed',
+        description: `Expense "${expenseToRemove.title}" was removed`,
+        details: {
+          expense: expenseToRemove,
+          payerName: payer?.name
+        }
+      });
+    }
   },
   updateExpense: async (id, expenseUpdates) => {
     const currentSessionId = get().currentSessionId;
@@ -87,6 +112,7 @@ export const createExpenseSlice: StateCreator<
     const session = get().getCurrentSession();
     if (!session) return;
 
+    const oldExpense = session.expenses.find(e => e.id === id);
     const updatedExpenses = session.expenses.map((e) =>
       e.id === id ? { ...e, ...expenseUpdates } : e
     );
@@ -103,6 +129,20 @@ export const createExpenseSlice: StateCreator<
       s.id === currentSessionId ? { ...s, expenses: updatedExpenses } : s
     );
     set({ sessions });
+    
+    // Add activity for expense update
+    if (oldExpense) {
+      const payer = session.members.find(m => m.id === oldExpense.paidBy);
+      await get().addActivity({
+        type: 'expense_updated',
+        description: `Expense "${oldExpense.title}" was updated`,
+        details: {
+          oldExpense,
+          newExpense: { ...oldExpense, ...expenseUpdates },
+          payerName: payer?.name
+        }
+      });
+    }
   },
 });
 

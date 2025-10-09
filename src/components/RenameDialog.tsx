@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   ResponsiveDialog,
@@ -10,6 +9,7 @@ import {
 import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface RenameDialogProps {
   open: boolean;
@@ -46,23 +46,58 @@ const RenameDialog: React.FC<RenameDialogProps> = ({
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
       <ResponsiveDialogContent className="sm:max-w-md">
-        <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>{title}</ResponsiveDialogTitle>
-          <ResponsiveDialogDescription>{description}</ResponsiveDialogDescription>
-        </ResponsiveDialogHeader>
-        <div className="p-4 sm:p-0">
-          <div className="py-4">
-            <Input
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-            />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+        >
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle>{title}</ResponsiveDialogTitle>
+            <ResponsiveDialogDescription>{description}</ResponsiveDialogDescription>
+          </ResponsiveDialogHeader>
+          <div className="p-4 sm:p-0">
+            <motion.div 
+              className="py-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1 }}
+            >
+              <Input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+                className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
+              />
+            </motion.div>
+            <DialogFooter>
+              <motion.div
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button 
+                  variant="outline" 
+                  onClick={() => onOpenChange(false)}
+                  className="transition-all duration-200"
+                >
+                  Cancel
+                </Button>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button 
+                  onClick={handleSave} 
+                  className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-all duration-300 text-white"
+                  disabled={!newName.trim() || newName.trim() === currentName}
+                >
+                  Save
+                </Button>
+              </motion.div>
+            </DialogFooter>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button onClick={handleSave} className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-white">Save</Button>
-          </DialogFooter>
-        </div>
+        </motion.div>
       </ResponsiveDialogContent>
     </ResponsiveDialog>
   );

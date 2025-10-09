@@ -1,8 +1,9 @@
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Member, Expense } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency, getInitials, getCurrencySymbol } from "@/lib/utils";
-import { ArrowDownRight, ArrowUpRight, ArrowRight, Users } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, ArrowRight, Users, TrendingUp, TrendingDown, CheckCircle, Circle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useAppStore } from "@/lib/store/index";
@@ -21,6 +22,9 @@ interface DetailedOwedAmount {
   amount: number;
   expenseTitle: string;
   expenseId: string;
+  isSettled: boolean;
+  settledAmount: number;
+  totalOwed: number;
 }
 
 const BalanceSummary: React.FC<BalanceSummaryProps> = ({
@@ -54,12 +58,20 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
           if (participantId !== expense.paidBy) {
             const participant = getMember(participantId);
             if (participant) {
+              // Calculate settled amount between these two members
+              const settledAmount = getSettledAmountBetween(participantId, expense.paidBy);
+              const totalOwed = getTotalOwedAmountBetween(participantId, expense.paidBy);
+              const isSettled = Math.abs(totalOwed - settledAmount) < 0.01; // Using epsilon for floating point comparison
+              
               owedAmounts.push({
                 from: participantId,
                 to: expense.paidBy,
                 amount: amountPerPerson,
                 expenseTitle: expense.title,
-                expenseId: expense.id
+                expenseId: expense.id,
+                isSettled,
+                settledAmount,
+                totalOwed
               });
             }
           }
@@ -70,12 +82,20 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
             const participant = getMember(participantId);
             const amount = expense.amount * (percentage / 100);
             if (participant && amount > 0) {
+              // Calculate settled amount between these two members
+              const settledAmount = getSettledAmountBetween(participantId, expense.paidBy);
+              const totalOwed = getTotalOwedAmountBetween(participantId, expense.paidBy);
+              const isSettled = Math.abs(totalOwed - settledAmount) < 0.01; // Using epsilon for floating point comparison
+              
               owedAmounts.push({
                 from: participantId,
                 to: expense.paidBy,
                 amount: amount,
                 expenseTitle: expense.title,
-                expenseId: expense.id
+                expenseId: expense.id,
+                isSettled,
+                settledAmount,
+                totalOwed
               });
             }
           }
@@ -85,12 +105,20 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
           if (participantId !== expense.paidBy) {
             const participant = getMember(participantId);
             if (participant && amount > 0) {
+              // Calculate settled amount between these two members
+              const settledAmount = getSettledAmountBetween(participantId, expense.paidBy);
+              const totalOwed = getTotalOwedAmountBetween(participantId, expense.paidBy);
+              const isSettled = Math.abs(totalOwed - settledAmount) < 0.01; // Using epsilon for floating point comparison
+              
               owedAmounts.push({
                 from: participantId,
                 to: expense.paidBy,
                 amount: amount,
                 expenseTitle: expense.title,
-                expenseId: expense.id
+                expenseId: expense.id,
+                isSettled,
+                settledAmount,
+                totalOwed
               });
             }
           }
@@ -138,17 +166,6 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
     }, 0);
   };
   
-  // Check if a specific expense amount is settled between two members
-  const isExpenseSettled = (from: string, to: string, expenseAmount: number): boolean => {
-    if (!session || !session.settlementsCompleted) return false;
-    
-    const settledAmount = getSettledAmountBetween(from, to);
-    const totalOwed = getTotalOwedAmountBetween(from, to);
-    
-    // If the total settled amount covers the total owed, then this expense is settled
-    return settledAmount >= totalOwed;
-  };
-  
   const memberBalances = Object.entries(balances)
     .map(([memberId, amount]) => ({
       member: getMember(memberId),
@@ -159,25 +176,69 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
   
   if (members.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <div className="mb-4 p-4 rounded-full bg-muted text-muted-foreground">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col items-center justify-center py-12"
+      >
+        <motion.div 
+          className="mb-4 p-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white"
+          animate={{ 
+            scale: [1, 1.1, 1],
+            rotate: [0, 10, -10, 0]
+          }}
+          transition={{ 
+            duration: 4,
+            repeat: Infinity,
+            repeatType: "reverse"
+          }}
+        >
           <Users className="h-8 w-8" />
-        </div>
-        <h3 className="text-xl font-medium mb-2">No members yet</h3>
-        <p className="text-muted-foreground mb-6 text-center max-w-xs">
+        </motion.div>
+        <motion.h3 
+          className="text-xl font-medium mb-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          No members yet
+        </motion.h3>
+        <motion.p 
+          className="text-muted-foreground mb-6 text-center max-w-xs"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
           Add members to your group to start tracking balances
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
     );
   }
   
   const detailedOwedAmounts = calculateDetailedOwedAmounts();
   
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Balance Summary</h3>
-        <div className="flex items-center space-x-2">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-4"
+    >
+      <motion.div 
+        className="flex justify-between items-center"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        <h3 className="text-lg font-medium flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-blue-500" />
+          Balance Summary
+        </h3>
+        <motion.div 
+          className="flex items-center space-x-2"
+          whileHover={{ scale: 1.02 }}
+        >
           <Label htmlFor="detailed-view" className="text-sm font-normal">
             {showDetailedView ? "Detailed View" : "Summary View"}
           </Label>
@@ -186,149 +247,210 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
             checked={showDetailedView}
             onCheckedChange={setShowDetailedView}
           />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
       
-      {!showDetailedView ? (
-        // Summary view (existing implementation)
-        <div className="space-y-3">
-          {memberBalances.map(({ member, amount }) => (
-            <Card 
-              key={member?.id || `member-${amount}`} 
-              className="glass-panel border-white/10 overflow-hidden"
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div 
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium text-white"
-                      style={{ backgroundColor: member?.avatarColor }}
-                    >
-                      {member ? getInitials(member.name) : '?'}
-                    </div>
-                    <div>
-                      <div className="font-medium">{member?.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {amount > 0 
-                          ? "gets back" 
-                          : amount < 0 
-                            ? "owes" 
-                            : "is settled up"}
+      <AnimatePresence mode="wait">
+        {!showDetailedView ? (
+          // Summary view (existing implementation)
+          <motion.div
+            key="summary"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-3"
+          >
+            {memberBalances.map(({ member, amount }, index) => (
+              <motion.div
+                key={member?.id || `member-${amount}`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                whileHover={{ y: -2 }}
+              >
+                <Card className="glass-panel border-white/10 overflow-hidden">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {member && (
+                          <motion.div
+                            className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium text-white"
+                            style={{ backgroundColor: member.avatarColor }}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                          >
+                            {getInitials(member.name)}
+                          </motion.div>
+                        )}
+                        <div>
+                          <div className="font-medium">{member?.name}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {amount > 0 ? "is owed" : amount < 0 ? "owes" : "settled"}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="text-right">
+                        <div className={`font-semibold text-lg ${
+                          amount > 0 ? "text-green-500" : 
+                          amount < 0 ? "text-red-500" : "text-gray-500"
+                        }`}>
+                          {amount > 0 ? "+" : ""}
+                          {getCurrencySymbol(currency)}
+                          {formatCurrency(Math.abs(amount), currency)}
+                        </div>
+                        <div className="flex items-center justify-end">
+                          {amount > 0 ? (
+                            <ArrowUpRight className="h-4 w-4 text-green-500" />
+                          ) : amount < 0 ? (
+                            <ArrowDownRight className="h-4 w-4 text-red-500" />
+                          ) : (
+                            <ArrowRight className="h-4 w-4 text-gray-500" />
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className={`font-semibold ${amount > 0 ? 'text-green-500' : amount < 0 ? 'text-red-400' : 'text-muted-foreground'}`}>
-                    <div className="flex items-center">
-                      {amount > 0 && <ArrowUpRight className="h-4 w-4 mr-1" />}
-                      {amount < 0 && <ArrowDownRight className="h-4 w-4 mr-1" />}
-                      <span>{getCurrencySymbol(currency)}</span>
-                      {formatCurrency(Math.abs(amount), currency)}
+                    
+                    {/* Animated progress bar */}
+                    <div className="mt-3">
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                        <motion.div
+                          className={`h-full rounded-full ${
+                            amount > 0 ? "bg-green-500" : 
+                            amount < 0 ? "bg-red-500" : "bg-gray-500"
+                          }`}
+                          initial={{ width: 0 }}
+                          animate={{ width: "100%" }}
+                          transition={{ duration: 1, delay: 0.2 + index * 0.05 }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        // Detailed view
-        <div className="space-y-4">
-          <Card className="glass-panel border-white/10">
-            <CardContent className="p-4">
-              <h4 className="font-medium mb-3">Who owes whom</h4>
-              {detailedOwedAmounts.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No expenses recorded yet</p>
-              ) : (
-                <div className="space-y-4">
-                  {detailedOwedAmounts.map((owed, index) => {
-                    const fromMember = getMember(owed.from);
-                    const toMember = getMember(owed.to);
-                    const isSettled = isExpenseSettled(owed.from, owed.to, owed.amount);
-                    
-                    if (!fromMember || !toMember) return null;
-                    
-                    return (
-                      <div key={`${owed.expenseId}-${owed.from}-${owed.to}`} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg bg-muted/50">
-                        <div className="flex items-center space-x-3">
-                          <div className="flex items-center space-x-2">
-                            <div 
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
+          // Detailed view with enhanced information
+          <motion.div
+            key="detailed"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-3"
+          >
+            {detailedOwedAmounts.map((owed, index) => {
+              const fromMember = getMember(owed.from);
+              const toMember = getMember(owed.to);
+              
+              return (
+                <motion.div
+                  key={`${owed.from}-${owed.to}-${owed.expenseId}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ y: -2 }}
+                >
+                  <Card className={`glass-panel border-white/10 overflow-hidden ${
+                    owed.isSettled ? "opacity-70" : ""
+                  }`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {fromMember && (
+                            <motion.div
                               className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium text-white"
                               style={{ backgroundColor: fromMember.avatarColor }}
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
                             >
                               {getInitials(fromMember.name)}
-                            </div>
-                            <span className="font-medium">{fromMember.name}</span>
-                          </div>
-                          
-                          <div className="hidden sm:block text-muted-foreground">
-                            <ArrowRight className="h-4 w-4" />
-                          </div>
-                          
-                          <div className="flex items-center space-x-2">
-                            <span className="font-medium">{toMember.name}</span>
-                            <div 
+                            </motion.div>
+                          )}
+                          <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                          {toMember && (
+                            <motion.div
                               className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium text-white"
                               style={{ backgroundColor: toMember.avatarColor }}
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
                             >
                               {getInitials(toMember.name)}
+                            </motion.div>
+                          )}
+                          <div>
+                            <div className="font-medium text-sm">{owed.expenseTitle}</div>
+                            <div className="flex items-center gap-1">
+                              {owed.isSettled ? (
+                                <>
+                                  <CheckCircle className="h-3 w-3 text-green-500" />
+                                  <span className="text-xs text-green-500">Settled</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Circle className="h-3 w-3 text-yellow-500" />
+                                  <span className="text-xs text-yellow-500">Pending</span>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
                         
-                        <div className="flex items-center justify-between sm:justify-normal gap-3">
-                          <div className="text-right">
-                            <div className="font-medium">
-                              <span>{getCurrencySymbol(currency)}</span>
-                              {formatCurrency(owed.amount, currency)}
-                            </div>
-                            <div className="text-xs text-muted-foreground truncate max-w-[120px]">
-                              for {owed.expenseTitle}
-                            </div>
+                        <div className="text-right">
+                          <div className="font-semibold">
+                            {getCurrencySymbol(currency)}
+                            {formatCurrency(owed.amount, currency)}
                           </div>
-                          
-                          <Badge variant={isSettled ? "default" : "secondary"} className={isSettled ? "bg-green-500/20 text-green-400" : "bg-orange-500/20 text-orange-400"}>
-                            {isSettled ? "Settled" : "Pending"}
-                          </Badge>
+                          {owed.settledAmount > 0 && (
+                            <div className="text-xs text-muted-foreground">
+                              {getCurrencySymbol(currency)}
+                              {formatCurrency(owed.settledAmount, currency)} / {getCurrencySymbol(currency)}
+                              {formatCurrency(owed.totalOwed, currency)} settled
+                            </div>
+                          )}
                         </div>
                       </div>
-                    );
-                  })}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+            
+            {/* Summary of overall settlement status */}
+            <motion.div
+              className="mt-4 p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-purple-600/10 border border-white/10"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Settlement Status</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {detailedOwedAmounts.filter(owed => owed.isSettled).length} of {detailedOwedAmounts.length} debts settled
+                  </p>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-          
-          <Card className="glass-panel border-white/10">
-            <CardContent className="p-4">
-              <h4 className="font-medium mb-3">Net balances</h4>
-              <div className="space-y-2">
-                {memberBalances.map(({ member, amount }) => (
-                  <div key={`net-${member?.id}`} className="flex justify-between items-center text-sm">
-                    <div className="flex items-center space-x-2">
-                      <div 
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white"
-                        style={{ backgroundColor: member?.avatarColor }}
-                      >
-                        {member ? getInitials(member.name) : '?'}
-                      </div>
-                      <span>{member?.name}</span>
-                    </div>
-                    <div className={`font-medium ${amount > 0 ? 'text-green-500' : amount < 0 ? 'text-red-400' : 'text-muted-foreground'}`}>
-                      {amount > 0 
-                        ? `gets back ${getCurrencySymbol(currency)}${formatCurrency(amount, currency)}` 
-                        : amount < 0 
-                          ? `owes ${getCurrencySymbol(currency)}${formatCurrency(Math.abs(amount), currency)}` 
-                          : "settled up"}
-                    </div>
-                  </div>
-                ))}
+                <Badge variant="secondary">
+                  {Math.round((detailedOwedAmounts.filter(owed => owed.isSettled).length / detailedOwedAmounts.length) * 100 || 0)}% Complete
+                </Badge>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-    </div>
+              <div className="mt-2 w-full bg-muted rounded-full h-2">
+                <motion.div
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ 
+                    width: `${(detailedOwedAmounts.filter(owed => owed.isSettled).length / detailedOwedAmounts.length) * 100 || 0}%` 
+                  }}
+                  transition={{ duration: 1, delay: 0.5 }}
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 

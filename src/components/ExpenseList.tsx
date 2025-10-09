@@ -1,6 +1,5 @@
-
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Expense, Member } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { 
@@ -11,7 +10,7 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { formatCurrency, formatDate, getInitials, getCurrencySymbol } from "@/lib/utils";
-import { PlusCircle, Receipt, MoreVertical, Pencil, Trash2, AlertTriangle } from "lucide-react";
+import { PlusCircle, Receipt, MoreVertical, Pencil, Trash2, AlertTriangle, Calendar, Tag } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -125,19 +124,55 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
   
   if (expenses.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <div className="mb-4 p-4 rounded-full bg-muted text-muted-foreground">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col items-center justify-center py-12"
+      >
+        <motion.div 
+          className="mb-4 p-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white"
+          animate={{ 
+            scale: [1, 1.1, 1],
+            rotate: [0, 5, -5, 0]
+          }}
+          transition={{ 
+            duration: 3,
+            repeat: Infinity,
+            repeatType: "reverse"
+          }}
+        >
           <Receipt className="h-8 w-8" />
-        </div>
-        <h3 className="text-xl font-medium mb-2">No expenses yet</h3>
-        <p className="text-muted-foreground mb-6 text-center max-w-xs">
+        </motion.div>
+        <motion.h3 
+          className="text-xl font-medium mb-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          No expenses yet
+        </motion.h3>
+        <motion.p 
+          className="text-muted-foreground mb-6 text-center max-w-xs"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
           Start tracking expenses by adding your first expense
-        </p>
-        <Button onClick={onAddExpense} className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-white">
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add an Expense
-        </Button>
-      </div>
+        </motion.p>
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <Button 
+            onClick={onAddExpense} 
+            className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-white"
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add an Expense
+          </Button>
+        </motion.div>
+      </motion.div>
     );
   }
   
@@ -158,7 +193,14 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
   
   return (
     <div>
-      <FilterSort filters={filters} setFilters={setFilters} />
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <FilterSort filters={filters} setFilters={setFilters} />
+      </motion.div>
+      
       <motion.div 
         variants={container}
         initial="hidden"
@@ -166,9 +208,22 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
         className="space-y-6"
       >
         {Object.entries(groupedExpenses).map(([date, dateExpenses], index) => (
-          <div key={`${date}-${index}`}>
+          <motion.div 
+            key={`${date}-${index}`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+          >
             <div className="sticky top-16 z-10 flex items-center py-2 bg-background/80 backdrop-blur-sm">
-              <h3 className="text-sm font-medium">{date}</h3>
+              <motion.div 
+                className="flex items-center gap-2"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-medium">{date}</h3>
+              </motion.div>
               <div className="ml-4 h-px flex-1 bg-border"></div>
             </div>
             
@@ -182,33 +237,66 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
                   <motion.div
                     key={uniqueKey}
                     variants={item}
-                    whileHover={{ y: -2 }}
-                    className="glass-panel rounded-lg overflow-hidden"
+                    whileHover={{ y: -2, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
+                    whileTap={{ scale: 0.99 }}
+                    className="glass-panel rounded-lg overflow-hidden border border-white/10"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.02 }}
                   >
                     <div className="p-4">
                       <div className="flex justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">{category?.icon}</span>
+                        <motion.div 
+                          className="flex items-center gap-2"
+                          whileHover={{ scale: 1.02 }}
+                        >
+                          <motion.span 
+                            className="text-xl"
+                            animate={{ 
+                              scale: [1, 1.1, 1],
+                            }}
+                            transition={{ 
+                              duration: 2,
+                              repeat: Infinity,
+                              repeatType: "reverse",
+                            }}
+                          >
+                            {category?.icon}
+                          </motion.span>
                           <h4 className="font-medium">{expense.title}</h4>
-                        </div>
+                        </motion.div>
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold">
+                          <motion.span 
+                            className="font-semibold"
+                            whileHover={{ scale: 1.05 }}
+                          >
                             <span>{getCurrencySymbol(currency)}</span>
                             {formatCurrency(expense.amount, currency)}
-                          </span>
+                          </motion.span>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
+                              <motion.div
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                              >
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </motion.div>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleEditExpense(expense)}>
-                                <Pencil className="mr-2 h-4 w-4" />
+                            <DropdownMenuContent align="end" className="backdrop-blur-lg bg-background/80 border-white/10">
+                              <DropdownMenuItem 
+                                onClick={() => handleEditExpense(expense)}
+                                className="flex items-center gap-2"
+                              >
+                                <Pencil className="h-4 w-4" />
                                 Edit
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleDeleteExpense(expense)} className="text-red-500">
-                                <Trash2 className="mr-2 h-4 w-4" />
+                              <DropdownMenuItem 
+                                onClick={() => handleDeleteExpense(expense)}
+                                className="flex items-center gap-2 text-red-500"
+                              >
+                                <Trash2 className="h-4 w-4" />
                                 Delete
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -216,76 +304,102 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
                         </div>
                       </div>
                       
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <span className="flex items-center">
-                          <span className="mr-1">Paid by</span>
-                          <div 
-                            className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium text-white"
-                            style={{ backgroundColor: paidBy?.avatarColor }}
-                          >
-                            {paidBy ? getInitials(paidBy.name) : '?'}
-                          </div>
-                          <span className="ml-1">{paidBy?.name || 'Unknown'}</span>
-                        </span>
-                        
-                        <span className="mx-2">•</span>
-                        
-                        <span>
-                          Split {expense.split === 'equal' ? 'equally' : 'custom'}
-                        </span>
-                      </div>
+                      <motion.div 
+                        className="flex items-center justify-between text-sm text-muted-foreground"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.1 }}
+                      >
+                        <div className="flex items-center gap-2">
+                          {paidBy && (
+                            <div className="flex items-center gap-1">
+                              <div
+                                className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium text-white"
+                                style={{ backgroundColor: paidBy.avatarColor }}
+                              >
+                                {getInitials(paidBy.name)}
+                              </div>
+                              <span>{paidBy.name}</span>
+                            </div>
+                          )}
+                          <span>•</span>
+                          <span>{expense.participants.length} participants</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Tag className="h-3 w-3" />
+                          <span>{category?.name || "Other"}</span>
+                        </div>
+                      </motion.div>
                       
                       {expense.description && (
-                        <p className="text-sm text-muted-foreground mt-2">
-                          {expense.description}
-                        </p>
+                        <motion.div 
+                          className="mt-2 text-sm text-muted-foreground"
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <p>{expense.description}</p>
+                        </motion.div>
                       )}
                     </div>
                   </motion.div>
                 );
               })}
             </div>
-          </div>
+          </motion.div>
         ))}
       </motion.div>
       
-      <EditExpenseDialog
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-        members={members}
-        expense={editingExpense}
-        onComplete={() => {
-          setShowEditDialog(false);
-          setEditingExpense(null);
-        }}
-      />
-
-      <AlertDialog open={!!expenseToDelete} onOpenChange={(open) => !open && setExpenseToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
-              Delete Expense
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete the expense "{expenseToDelete?.title}"? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              className="bg-destructive hover:bg-destructive/90"
-              onClick={confirmDeleteExpense}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Delete Confirmation Dialog */}
+      <AnimatePresence>
+        {expenseToDelete && (
+          <AlertDialog open={!!expenseToDelete} onOpenChange={() => setExpenseToDelete(null)}>
+            <AlertDialogContent>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              >
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-red-500" />
+                    Confirm Deletion
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete the expense "{expenseToDelete.title}"? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={confirmDeleteExpense}
+                    className="bg-red-500 hover:bg-red-600"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </motion.div>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+      </AnimatePresence>
+      
+      {/* Edit Expense Dialog */}
+      {editingExpense && (
+        <EditExpenseDialog
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          expense={editingExpense}
+          members={members}
+          onComplete={() => {
+            setShowEditDialog(false);
+            setEditingExpense(null);
+          }}
+        />
+      )}
     </div>
   );
 };
-
 
 export default ExpenseList;

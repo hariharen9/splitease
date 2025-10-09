@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -24,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Label } from "@/components/ui/label";
 import { DateRange } from "react-day-picker";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface FilterSortProps {
   filters: {
@@ -62,53 +62,117 @@ const FilterSort: React.FC<FilterSortProps> = ({ filters, setFilters }) => {
 
   return (
     <div className="flex items-center justify-between mb-4">
-      <h3 className="text-lg font-medium">Expenses</h3>
+      <motion.h3 
+        className="text-lg font-medium"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        Expenses
+      </motion.h3>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline">
-            <Filter className="mr-2 h-4 w-4" />
-            Filter / Sort
-          </Button>
-        </DropdownMenuTrigger>
+        <motion.div
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="group">
+              <motion.div
+                animate={{ rotate: [0, 15, 0, -15, 0] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+              >
+                <Filter className="mr-2 h-4 w-4 group-hover:text-primary transition-colors" />
+              </motion.div>
+              Filter / Sort
+            </Button>
+          </DropdownMenuTrigger>
+        </motion.div>
         <DropdownMenuContent align="end" className="w-80 p-4 space-y-4">
-          <DropdownMenuLabel>Filter & Sort</DropdownMenuLabel>
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <DropdownMenuLabel>Filter & Sort</DropdownMenuLabel>
+          </motion.div>
           <DropdownMenuSeparator />
           
-          <div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
             <Label className="text-sm font-medium">Sort by</Label>
             <Select value={filters.sort} onValueChange={handleSortChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Select sort order" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="date-desc">Date (Newest first)</SelectItem>
-                <SelectItem value="date-asc">Date (Oldest first)</SelectItem>
-                <SelectItem value="amount-desc">Amount (High to low)</SelectItem>
-                <SelectItem value="amount-asc">Amount (Low to high)</SelectItem>
+                <AnimatePresence>
+                  {[
+                    { value: "date-desc", label: "Date (Newest first)" },
+                    { value: "date-asc", label: "Date (Oldest first)" },
+                    { value: "amount-desc", label: "Amount (High to low)" },
+                    { value: "amount-asc", label: "Amount (Low to high)" }
+                  ].map((item, index) => (
+                    <motion.div
+                      key={item.value}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2, delay: index * 0.05 }}
+                    >
+                      <SelectItem value={item.value}>{item.label}</SelectItem>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </SelectContent>
             </Select>
-          </div>
+          </motion.div>
 
           <DropdownMenuSeparator />
 
-          <div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+          >
             <Label className="text-sm font-medium">Category</Label>
             <Select value={filters.category} onValueChange={handleCategoryChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map(category => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <SelectItem value="all">All Categories</SelectItem>
+                </motion.div>
+                <AnimatePresence>
+                  {categories.map((category, index) => (
+                    <motion.div
+                      key={category.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2, delay: index * 0.05 }}
+                    >
+                      <SelectItem value={category.id}>{category.name}</SelectItem>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </SelectContent>
             </Select>
-          </div>
+          </motion.div>
 
-          <div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: 0.3 }}
+          >
             <Label className="text-sm font-medium">Date Range</Label>
             <Popover>
               <PopoverTrigger asChild>
@@ -144,25 +208,35 @@ const FilterSort: React.FC<FilterSortProps> = ({ filters, setFilters }) => {
                 />
               </PopoverContent>
             </Popover>
-          </div>
+          </motion.div>
 
-          <div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: 0.4 }}
+          >
             <Label className="text-sm font-medium">Amount Range</Label>
             <div className="flex items-center gap-2">
-              <Input 
-                type="number" 
-                placeholder="Min"
-                value={filters.amountRange.min || ""}
-                onChange={(e) => handleAmountChange("min", e.target.value)}
-              />
-              <Input 
-                type="number" 
-                placeholder="Max" 
-                value={filters.amountRange.max || ""}
-                onChange={(e) => handleAmountChange("max", e.target.value)}
-              />
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Input 
+                  type="number" 
+                  placeholder="Min"
+                  value={filters.amountRange.min || ""}
+                  onChange={(e) => handleAmountChange("min", e.target.value)}
+                  className="transition-all duration-200"
+                />
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Input 
+                  type="number" 
+                  placeholder="Max" 
+                  value={filters.amountRange.max || ""}
+                  onChange={(e) => handleAmountChange("max", e.target.value)}
+                  className="transition-all duration-200"
+                />
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
 
         </DropdownMenuContent>
       </DropdownMenu>

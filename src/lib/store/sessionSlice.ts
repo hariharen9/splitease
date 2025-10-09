@@ -1,6 +1,5 @@
-
 import { StateCreator } from 'zustand';
-import { Session } from '../types';
+import { Session, Settlement, Activity } from '../types';
 import * as firestoreService from '../firestore';
 import { generateId, generatePin } from '../utils';
 
@@ -15,6 +14,8 @@ export interface SessionSlice {
   updateSessionTitle: (title: string) => Promise<void>;
   deleteSession: (sessionId: string) => Promise<void>;
   syncSessionFromFirestore: (session: Session) => void;
+  markSettlementAsCompleted: (settlement: Settlement) => Promise<void>;
+  addActivity: (activity: Omit<Activity, 'id' | 'timestamp'>) => Promise<void>;
 }
 
 export const createSessionSlice: StateCreator<SessionSlice, [], [], SessionSlice> = (set, get) => ({
@@ -48,8 +49,15 @@ export const createSessionSlice: StateCreator<SessionSlice, [], [], SessionSlice
       currentSessionPin: newSession.pin,
     }));
 
-    // This will be moved to a separate activity slice
-    // get().addActivity(...);
+    // Add activity for session creation
+    await get().addActivity({
+      type: 'session_created',
+      description: `Session "${newSession.title}" was created`,
+      details: {
+        sessionId: newSession.id,
+        title: newSession.title
+      }
+    });
 
     return newSession;
   },
@@ -127,6 +135,17 @@ export const createSessionSlice: StateCreator<SessionSlice, [], [], SessionSlice
         console.error('Error updating session title in Firestore:', error);
       }
     }
+    
+    // Add activity for session update
+    await get().addActivity({
+      type: 'session_updated',
+      description: `Session title updated to "${title}"`,
+      details: {
+        sessionId: currentSession.id,
+        oldTitle: currentSession.title,
+        newTitle: title
+      }
+    });
   },
   deleteSession: async (sessionId) => {
     const sessionToDelete = get().sessions.find((s) => s.id === sessionId);
@@ -151,6 +170,85 @@ export const createSessionSlice: StateCreator<SessionSlice, [], [], SessionSlice
     set((state) => ({
       sessions: state.sessions.map((s) => (s.id === session.id ? session : s)),
     }));
+  },
+  markSettlementAsCompleted: async (settlement) => {
+    const currentSessionId = get().currentSessionId;
+    const currentPin = get().currentSessionPin;
+
+    if (!currentSessionId) return;
+
+    const session = get().getCurrentSession();
+    if (!session) return;
+
+    const updatedSettlements = [...(session.settlementsCompleted || []), settlement];
+
+    if (useAppStore.getState().isFirestoreConnected && currentPin) {
+      try {
+        await firestoreService.updateSessionSettlements(currentPin, updatedSettlements);
+      } catch (error) {
+        console.error('Error updating settlements in Firestore:', error);
+        throw error;
+      }
+    }
+
+    const sessions = get().sessions.map((s) =>
+      s.id === currentSessionId 
+        ? { ...s, settlementsCompleted: updatedSettlements } 
+        : s
+    );
+    set({ sessions });
+    
+    // Add activity for settlement completion
+    const fromMember = session.members.find(m => m.id === settlement.from);
+    const toMember = session.members.find(m => m.id === settlement.to);
+    
+    await get().addActivity({
+      type: 'settlement_completed',
+      description: `${fromMember?.name || 'Someone'} settled up with ${toMember?.name || 'someone'}`,
+      details: {
+        from: settlement.from,
+        to: settlement.to,
+        amount: settlement.amount,
+        currency: session.currency,
+        fromName: fromMember?.name,
+        toName: toMember?.name
+      }
+    });
+  },
+  addActivity: async (activity) => {
+    const currentSessionId = get().currentSessionId;
+    const currentPin = get().currentSessionPin;
+
+    if (!currentSessionId) return;
+
+    const newActivity: Activity = {
+      id: generateId(),
+      timestamp: new Date().toISOString(),
+      ...activity
+    };
+
+    const sessions = get().sessions.map((s) =>
+      s.id === currentSessionId
+        ? { 
+            ...s, 
+            activities: [...(s.activities || []), newActivity].sort(
+              (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+            ).slice(0, 100) // Keep only the last 100 activities
+          }
+        : s
+    );
+    set({ sessions });
+
+    if (useAppStore.getState().isFirestoreConnected && currentPin) {
+      try {
+        // Note: Firestore doesn't have a direct way to update nested arrays
+        // We'll need to update the entire session or use a subcollection
+        // For now, we'll rely on the session sync to handle this
+        console.log('Activity added locally. Firestore sync will handle remote update.');
+      } catch (error) {
+        console.error('Error adding activity in Firestore:', error);
+      }
+    }
   },
 });
 

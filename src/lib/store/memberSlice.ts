@@ -1,4 +1,3 @@
-
 import { StateCreator } from 'zustand';
 import { Member } from '../types';
 import { generateId } from '../utils';
@@ -49,6 +48,16 @@ export const createMemberSlice: StateCreator<
         set({ sessions: revertedSessions });
       }
     }
+    
+    // Add activity for member addition
+    await get().addActivity({
+      type: 'member_added',
+      description: `Member "${name}" was added to the group`,
+      details: {
+        memberId: newMember.id,
+        memberName: name
+      }
+    });
   },
   removeMember: async (id) => {
     const currentSessionId = get().currentSessionId;
@@ -59,6 +68,7 @@ export const createMemberSlice: StateCreator<
     const session = get().getCurrentSession();
     if (!session) return;
 
+    const memberToRemove = session.members.find(m => m.id === id);
     const isMemberInvolvedInExpenses = session.expenses.some(
       (expense) => expense.paidBy === id || expense.participants.includes(id)
     );
@@ -83,6 +93,18 @@ export const createMemberSlice: StateCreator<
         throw new Error('Failed to remove member from the session.');
       }
     }
+    
+    // Add activity for member removal
+    if (memberToRemove) {
+      await get().addActivity({
+        type: 'member_removed',
+        description: `Member "${memberToRemove.name}" was removed from the group`,
+        details: {
+          memberId: memberToRemove.id,
+          memberName: memberToRemove.name
+        }
+      });
+    }
   },
   updateMember: async (id, name) => {
     const currentSessionId = get().currentSessionId;
@@ -93,6 +115,7 @@ export const createMemberSlice: StateCreator<
     const session = get().getCurrentSession();
     if (!session) return;
 
+    const oldMember = session.members.find(m => m.id === id);
     const updatedMembers = session.members.map((m) =>
       m.id === id ? { ...m, name } : m
     );
@@ -109,6 +132,19 @@ export const createMemberSlice: StateCreator<
         console.error('Error updating member in Firestore:', error);
         set({ sessions: get().sessions }); // Revert
       }
+    }
+    
+    // Add activity for member update
+    if (oldMember) {
+      await get().addActivity({
+        type: 'member_added', // Using member_added for updates as well
+        description: `Member "${oldMember.name}" was renamed to "${name}"`,
+        details: {
+          memberId: id,
+          oldName: oldMember.name,
+          newName: name
+        }
+      });
     }
   },
 });
