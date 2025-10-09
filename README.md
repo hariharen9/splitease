@@ -9,9 +9,9 @@
     <a href="https://splitease.netlify.app/"><strong>splitease.netlify.app »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/hariharen/splitease/issues/new?template=bug_report.md">Report Bug</a>
+    <a href="https://github.com/hariharen9/splitease/issues/new?template=bug_report.md">Report Bug</a>
     ·
-    <a href="https://github.com/hariharen/splitease/issues/new?template=feature_request.md">Request Feature</a>
+    <a href="https://github.com/hariharen9/splitease/issues/new?template=feature_request.md">Request Feature</a>
   </p>
 </div>
 
@@ -103,7 +103,7 @@ Make sure you have [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.co
 
 1.  **Clone the repository:**
     ```sh
-    git clone https://github.com/hariharen/splitease.git
+    git clone https://github.com/hariharen9/splitease.git
     ```
 2.  **Navigate to the project directory:**
     ```sh
@@ -157,7 +157,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 Developed with ❤️ by **Hariharen**
 
 -   LinkedIn: [linkedin.com/in/hariharen9](https://www.linkedin.com/in/hariharen9/)
--   GitHub: [github.com/hariharen](https://github.com/hariharen)
+-   GitHub: [github.com/hariharen9](https://github.com/hariharen9)
 
 ---
 

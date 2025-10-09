@@ -271,6 +271,56 @@ const SessionPage = () => {
     { id: "activity", label: "Activity", icon: Activity },
   ];
 
+  // Function to determine who should pay next based on balances
+  const getPaymentSuggestion = (members: Member[], balances: Record<string, number>): string => {
+    // If we don't have enough members or balance data, return a default message
+    if (members.length < 2 || Object.keys(balances).length === 0) {
+      const randomMember = members[Math.floor(Math.random() * members.length)];
+      return randomMember ? `${randomMember.name} should pay for the next expense.` : "Add members to get personalized suggestions.";
+    }
+
+    // Find the member who owes the most (most negative balance)
+    let maxDebt = 0;
+    let debtorId = "";
+    
+    // Find the member who is owed the most (most positive balance)
+    let maxCredit = 0;
+    let creditorId = "";
+    
+    Object.entries(balances).forEach(([memberId, balance]) => {
+      if (balance < maxDebt) {
+        maxDebt = balance;
+        debtorId = memberId;
+      }
+      if (balance > maxCredit) {
+        maxCredit = balance;
+        creditorId = memberId;
+      }
+    });
+    
+    // Get member names
+    const debtor = members.find(m => m.id === debtorId);
+    const creditor = members.find(m => m.id === creditorId);
+    
+    // If we have a clear debtor, suggest they pay next
+    if (debtor && maxDebt < -1) { // Only suggest if debt is significant (> 1 unit)
+      return `${debtor.name} should pay for the next expense to reduce their balance.`;
+    }
+    
+    // If we have a clear creditor, suggest someone else pays to balance things
+    if (creditor && maxCredit > 1) { // Only suggest if credit is significant (> 1 unit)
+      const otherMembers = members.filter(m => m.id !== creditorId);
+      if (otherMembers.length > 0) {
+        const randomMember = otherMembers[Math.floor(Math.random() * otherMembers.length)];
+        return `${randomMember.name} should pay for the next expense to keep things balanced.`;
+      }
+    }
+    
+    // If balances are relatively even, suggest a random member
+    const randomMember = members[Math.floor(Math.random() * members.length)];
+    return `${randomMember.name} should pay for the next expense to maintain balance.`;
+  };
+
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
       {/* Animated gradient background */}
