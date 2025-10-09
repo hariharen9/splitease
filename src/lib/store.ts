@@ -729,63 +729,55 @@ export const useAppStore = create<AppState>()(
       calculateSettlements: () => {
         const session = get().getCurrentSession();
         if (!session) return [];
-        
+
         const balances = get().calculateBalances();
-        const settlements: Settlement[] = [];
-        
-        // Separate debtors and creditors
-        const debtors: { id: string; amount: number }[] = [];
-        const creditors: { id: string; amount: number }[] = [];
-        
-        Object.entries(balances).forEach(([id, amount]) => {
-          if (amount < 0) {
-            debtors.push({ id, amount: -amount });
-          } else if (amount > 0) {
-            creditors.push({ id, amount });
-          }
+        const completedSettlements = session.settlementsCompleted || [];
+
+        // Adjust balances with completed settlements
+        completedSettlements.forEach(settlement => {
+          balances[settlement.from] += settlement.amount;
+          balances[settlement.to] -= settlement.amount;
         });
-        
-        // Sort by amount (largest first)
-        debtors.sort((a, b) => b.amount - a.amount);
-        creditors.sort((a, b) => b.amount - a.amount);
-        
-        // Create settlements
-        while (debtors.length > 0 && creditors.length > 0) {
-          const debtor = debtors[0];
-          const creditor = creditors[0];
-          
+
+        const debtors = Object.entries(balances)
+          .filter(([, amount]) => amount < 0)
+          .map(([id, amount]) => ({ id, amount: -amount }));
+
+        const creditors = Object.entries(balances)
+          .filter(([, amount]) => amount > 0)
+          .map(([id, amount]) => ({ id, amount }));
+
+        debtors.sort((a, b) => a.amount - b.amount);
+        creditors.sort((a, b) => a.amount - b.amount);
+
+        const settlements: Settlement[] = [];
+        let i = 0;
+        let j = 0;
+
+        while (i < debtors.length && j < creditors.length) {
+          const debtor = debtors[i];
+          const creditor = creditors[j];
           const amount = Math.min(debtor.amount, creditor.amount);
-          
-          const settlement: Settlement = {
-            from: debtor.id,
-            to: creditor.id,
-            amount: Math.round(amount * 100) / 100 // Round to 2 decimal places
-          };
-          
-          // Check if this settlement is already completed
-          const isCompleted = (session.settlementsCompleted || []).some(
-            completed => 
-              completed.from === settlement.from && 
-              completed.to === settlement.to && 
-              Math.abs(completed.amount - settlement.amount) < 0.01
-          );
-          
-          if (!isCompleted) {
-            settlements.push(settlement);
+
+          if (amount > 1e-9) { // Only add settlement if amount is not negligible
+            settlements.push({
+              from: debtor.id,
+              to: creditor.id,
+              amount: amount,
+            });
           }
-          
+
           debtor.amount -= amount;
           creditor.amount -= amount;
-          
-          if (Math.abs(debtor.amount) < 0.01) {
-            debtors.shift();
+
+          if (debtor.amount < 1e-9) {
+            i++;
           }
-          
-          if (Math.abs(creditor.amount) < 0.01) {
-            creditors.shift();
+          if (creditor.amount < 1e-9) {
+            j++;
           }
         }
-        
+
         return settlements;
       }
     }),
