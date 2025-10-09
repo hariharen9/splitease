@@ -70,15 +70,16 @@ const RenameDialog: React.FC<RenameDialogProps> = ({
                 className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
               />
             </motion.div>
-            <DialogFooter>
+            <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-3">
               <motion.div
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
+                className="w-full sm:w-auto"
               >
                 <Button 
                   variant="outline" 
                   onClick={() => onOpenChange(false)}
-                  className="transition-all duration-200"
+                  className="transition-all duration-200 w-full sm:w-auto"
                 >
                   Cancel
                 </Button>
@@ -86,10 +87,11 @@ const RenameDialog: React.FC<RenameDialogProps> = ({
               <motion.div
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
+                className="w-full sm:w-auto"
               >
                 <Button 
                   onClick={handleSave} 
-                  className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-all duration-300 text-white"
+                  className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-all duration-300 text-white w-full sm:w-auto"
                   disabled={!newName.trim() || newName.trim() === currentName}
                 >
                   Save

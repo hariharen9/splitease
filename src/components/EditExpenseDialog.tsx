@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useForm, useWatch } from "react-hook-form";
 import {
   ResponsiveDialog,
@@ -119,7 +119,37 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
   const handleCustomSplitChange = (memberId: string, value: string) => {
     const numValue = parseFloat(value) || 0;
     const currentSplits = form.getValues('customSplits') || {};
-    form.setValue('customSplits', { ...currentSplits, [memberId]: numValue });
+    const updatedSplits = { ...currentSplits, [memberId]: numValue };
+    
+    // For percentage splits, auto-distribute remaining percentage among other participants
+    if (splitType === "percentage") {
+      const totalEntered = Object.values(updatedSplits).reduce((sum, val) => sum + val, 0);
+      const enteredCount = Object.keys(updatedSplits).length;
+      const participantCount = participants.length;
+      
+      // If we haven't entered values for all participants yet, don't auto-distribute
+      if (enteredCount < participantCount) {
+        form.setValue('customSplits', updatedSplits);
+        return;
+      }
+      
+      // If total is exactly 100, just update the value
+      if (Math.abs(totalEntered - 100) < 0.01) {
+        form.setValue('customSplits', updatedSplits);
+        return;
+      }
+      
+      // If only one participant left to fill, calculate their value
+      const unfilledParticipants = participants.filter(id => !(id in updatedSplits) || updatedSplits[id] === 0);
+      if (unfilledParticipants.length === 1) {
+        const remaining = 100 - totalEntered + numValue; // Add back the current value since we're recalculating
+        updatedSplits[unfilledParticipants[0]] = Math.max(0, remaining);
+        form.setValue('customSplits', updatedSplits);
+        return;
+      }
+    }
+    
+    form.setValue('customSplits', updatedSplits);
   };
 
   const validateCustomSplits = () => {
@@ -141,6 +171,15 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
     setCustomSplitError(null);
     return true;
   };
+  
+  // Real-time validation as users type
+  useEffect(() => {
+    if (splitType !== 'equal') {
+      validateCustomSplits();
+    } else {
+      setCustomSplitError(null);
+    }
+  }, [form.watch('customSplits'), amount, splitType]);
   
   const onSubmit = (data: FormValues) => {
     if (!expense) return;
@@ -194,7 +233,7 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
           exit={{ opacity: 0, scale: 0.8 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
         >
-          <ResponsiveDialogContent className="sm:max-w-lg">
+          <ResponsiveDialogContent className="sm:max-w-lg max-w-[95vw] mx-auto">
             <motion.div
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -220,13 +259,13 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
             </motion.div>
             
             <motion.div
-              className="px-4 sm:px-0"
+              className="px-2 sm:px-0 max-h-[70vh] overflow-y-auto"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6 pb-4">
                   <motion.div
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
@@ -294,126 +333,81 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                     />
                   </motion.div>
                   
+                  {/* Date and Paid By in the same row */}
                   <motion.div
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.5 }}
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"
                   >
-                    <FormField
-                      control={form.control}
-                      name="date"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel className="flex items-center gap-2">
-                            <CalendarIcon className="h-4 w-4" />
-                            Date
-                          </FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "glass-input pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value ? (
-                                    format(field.value, "PPP")
-                                  ) : (
-                                    <span>Pick a date</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                disabled={(date) =>
-                                  date > new Date() || date < new Date("1900-01-01")
-                                }
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </motion.div>
-                  
-                  <motion.div
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.6 }}
-                  >
-                    <FormField
-                      control={form.control}
-                      name="paidBy"
-                      rules={{ required: "Please select who paid" }}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            <User className="h-4 w-4" />
-                            Paid By
-                          </FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger className="glass-input">
-                                <SelectValue placeholder="Select payer" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {members.map((member) => (
-                                <SelectItem key={member.id} value={member.id}>
-                                  {member.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </motion.div>
-                  
-                  <motion.div
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.7 }}
-                  >
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        Participants
-                      </FormLabel>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {members.map((member) => (
-                          <motion.div
-                            key={member.id}
-                            whileHover={{ scale: 1.03 }}
-                            whileTap={{ scale: 0.97 }}
-                          >
-                            <FormField
-                              control={form.control}
-                              name="participants"
-                              render={({ field }) => {
-                                return (
-                                  <Checkbox
-                                    checked={field.value?.includes(member.id)}
-                                    onCheckedChange={(checked) => {
-                                      return checked
-                                        ? field.onChange([...field.value, member.id])
-                                        : field.onChange(
-                                            field.value?.filter(
-                                              (value) => value !== member.id
-                                            )
-                                          );
-                                    }}
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="date"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel className="flex items-center gap-2">
+                              <CalendarIcon className="h-4 w-4" />
+                              Date
+                            </FormLabel>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                      "glass-input pl-3 text-left font-normal w-full text-sm sm:text-base",
+                                      !field.value && "text-muted-foreground"
+                                    )}
                                   >
+                                    {field.value ? (
+                                      format(field.value, "MMM d, yyyy")
+                                    ) : (
+                                      <span>Pick a date</span>
+                                    )}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={field.onChange}
+                                  disabled={(date) =>
+                                    date > new Date() || date < new Date("1900-01-01")
+                                  }
+                                  initialFocus
+                                  className="text-sm"
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="paidBy"
+                        rules={{ required: "Please select who paid" }}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center gap-2">
+                              <User className="h-4 w-4" />
+                              Paid By
+                            </FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="glass-input w-full text-sm sm:text-base">
+                                  <SelectValue placeholder="Select payer" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {members.map((member) => (
+                                  <SelectItem key={member.id} value={member.id} className="text-sm">
                                     <div className="flex items-center gap-2">
                                       <div
                                         className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white"
@@ -421,9 +415,69 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                                       >
                                         {member.name.charAt(0)}
                                       </div>
-                                      <span className="text-sm truncate">{member.name}</span>
+                                      <span className="truncate">{member.name}</span>
                                     </div>
-                                  </Checkbox>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </motion.div>
+                  
+                  <motion.div
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                  >
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        Participants
+                      </FormLabel>
+                      <div className="grid grid-cols-2 gap-2 mt-2 max-h-40 overflow-y-auto p-1">
+                        {members.map((member) => (
+                          <motion.div
+                            key={member.id}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="border rounded-lg p-2 bg-white/5 border-white/10 hover:bg-white/10 transition-colors"
+                          >
+                            <FormField
+                              control={form.control}
+                              name="participants"
+                              render={({ field }) => {
+                                return (
+                                  <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                      id={`participant-${member.id}`}
+                                      checked={field.value?.includes(member.id)}
+                                      onCheckedChange={(checked) => {
+                                        return checked
+                                          ? field.onChange([...field.value, member.id])
+                                          : field.onChange(
+                                              field.value?.filter(
+                                                (value) => value !== member.id
+                                              )
+                                            );
+                                      }}
+                                    />
+                                    <Label 
+                                      htmlFor={`participant-${member.id}`} 
+                                      className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
+                                    >
+                                      <div
+                                        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white flex-shrink-0"
+                                        style={{ backgroundColor: member.avatarColor }}
+                                      >
+                                        {member.name.charAt(0)}
+                                      </div>
+                                      <span className="text-sm truncate">{member.name}</span>
+                                    </Label>
+                                  </div>
                                 );
                               }}
                             />
@@ -433,10 +487,123 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                     </FormItem>
                   </motion.div>
                   
+                  {/* Custom Split Inputs - Only shown when percentage or amount split is selected */}
+                  <AnimatePresence>
+                    {splitType !== "equal" && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="space-y-3"
+                      >
+                        <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                          <h4 className="font-medium mb-2">
+                            {splitType === "percentage" ? "Percentage Split" : "Amount Split"}
+                          </h4>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            {splitType === "percentage" 
+                              ? "Enter the percentage for each participant" 
+                              : "Enter the amount for each participant"}
+                          </p>
+                          
+                          {splitType === "amount" && (
+                            <motion.div 
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="mb-3 p-2 bg-gradient-to-r from-blue-500/20 to-purple-600/20 rounded-md"
+                            >
+                              <p className="text-sm font-medium text-center">
+                                Total expense amount: <span className="font-bold">${amount.toFixed(2)}</span>
+                              </p>
+                            </motion.div>
+                          )}
+                          
+                          <div className="space-y-2">
+                            {participants.map((participantId) => {
+                              const participant = members.find(m => m.id === participantId);
+                              if (!participant) return null;
+                              
+                              const currentValue = form.getValues('customSplits')?.[participantId] || "";
+                              
+                              return (
+                                <motion.div
+                                  key={participantId}
+                                  initial={{ x: -10, opacity: 0 }}
+                                  animate={{ x: 0, opacity: 1 }}
+                                  transition={{ delay: 0.1 }}
+                                  className="flex items-center gap-2"
+                                >
+                                  <div
+                                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium text-white flex-shrink-0"
+                                    style={{ backgroundColor: participant.avatarColor }}
+                                  >
+                                    {participant.name.charAt(0)}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <span className="text-sm truncate">{participant.name}</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <Input
+                                      type="number"
+                                      step={splitType === "percentage" ? "0.1" : "0.01"}
+                                      placeholder={splitType === "percentage" ? "0.0%" : "$0.00"}
+                                      className="glass-input w-24 text-right text-sm"
+                                      onChange={(e) => {
+                                        handleCustomSplitChange(participantId, e.target.value);
+                                      }}
+                                      value={currentValue}
+                                    />
+                                    <span className="ml-1 text-sm text-muted-foreground">
+                                      {splitType === "percentage" ? "%" : ""}
+                                    </span>
+                                  </div>
+                                </motion.div>
+                              );
+                            })}
+                          </div>
+                          
+                          {customSplitError && (
+                            <motion.p 
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              className="text-sm text-red-400 mt-2"
+                            >
+                              {customSplitError}
+                            </motion.p>
+                          )}
+                          
+                          <div className="mt-2 pt-2 border-t border-white/10">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">
+                                {splitType === "percentage" ? "Total Percentage:" : "Total Amount:"}
+                              </span>
+                              <span className={splitType === "percentage" 
+                                ? (Math.abs(Object.values(form.getValues('customSplits') || {}).reduce((sum, val) => sum + val, 0) - 100) < 0.01 ? "font-medium text-green-400" : "font-medium text-red-400")
+                                : (Math.abs(Object.values(form.getValues('customSplits') || {}).reduce((sum, val) => sum + val, 0) - amount) < 0.01 ? "font-medium text-green-400" : "font-medium text-red-400")}>
+                                {splitType === "percentage" 
+                                  ? `${Object.values(form.getValues('customSplits') || {}).reduce((sum, val) => sum + val, 0).toFixed(2)}%`
+                                  : `$${Object.values(form.getValues('customSplits') || {}).reduce((sum, val) => sum + val, 0).toFixed(2)}`}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">
+                                {splitType === "percentage" ? "Required:" : "Required:"}
+                              </span>
+                              <span className="font-medium">
+                                {splitType === "percentage" ? "100%" : `$${amount.toFixed(2)}`}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  
                   <motion.div
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.8 }}
+                    transition={{ delay: 0.7 }}
                   >
                     <FormField
                       control={form.control}
@@ -446,16 +613,16 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                           <FormLabel>Split Type</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                              <SelectTrigger className="glass-input">
+                              <SelectTrigger className="glass-input text-sm sm:text-base">
                                 <SelectValue placeholder="Select split type" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
                               <SelectGroup>
                                 <SelectLabel>Split Options</SelectLabel>
-                                <SelectItem value="equal">Equal Split</SelectItem>
-                                <SelectItem value="percentage">Percentage Split</SelectItem>
-                                <SelectItem value="amount">Custom Amount Split</SelectItem>
+                                <SelectItem value="equal" className="text-sm">Equal Split</SelectItem>
+                                <SelectItem value="percentage" className="text-sm">Percentage Split</SelectItem>
+                                <SelectItem value="amount" className="text-sm">Custom Amount Split</SelectItem>
                               </SelectGroup>
                             </SelectContent>
                           </Select>
@@ -468,7 +635,7 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                   <motion.div
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.9 }}
+                    transition={{ delay: 0.8 }}
                   >
                     <FormField
                       control={form.control}
@@ -478,7 +645,7 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                           <FormLabel>Category</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                              <SelectTrigger className="glass-input">
+                              <SelectTrigger className="glass-input text-sm sm:text-base">
                                 <SelectValue placeholder="Select category" />
                               </SelectTrigger>
                             </FormControl>
@@ -486,7 +653,7 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                               <SelectGroup>
                                 <SelectLabel>Categories</SelectLabel>
                                 {categories.map((category) => (
-                                  <SelectItem key={category.id} value={category.id}>
+                                  <SelectItem key={category.id} value={category.id} className="text-sm">
                                     <div className="flex items-center gap-2">
                                       <span>{category.icon}</span>
                                       <span>{category.name}</span>
@@ -505,7 +672,7 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                   <motion.div
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 1.0 }}
+                    transition={{ delay: 0.9 }}
                   >
                     <FormField
                       control={form.control}
@@ -516,7 +683,7 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                           <FormControl>
                             <Textarea
                               placeholder="Add any details about this expense..."
-                              className="glass-input resize-none"
+                              className="glass-input resize-none text-sm"
                               {...field}
                             />
                           </FormControl>
@@ -530,12 +697,12 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                     <motion.div
                       initial={{ y: 20, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 1.1 }}
-                      className="flex-1"
+                      transition={{ delay: 1.0 }}
+                      className="flex-1 pb-4 sm:pb-0"
                     >
                       <Button 
                         type="submit" 
-                        className="w-full bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity"
+                        className="w-full bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-sm sm:text-base h-10 sm:h-12"
                         disabled={isSubmitting}
                       >
                         {isSubmitting ? (
@@ -554,12 +721,13 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                     <motion.div
                       initial={{ y: 20, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 1.2 }}
+                      transition={{ delay: 1.1 }}
                     >
                       <Button
                         type="button"
                         variant="destructive"
                         onClick={() => setShowDeleteDialog(true)}
+                        className="h-10 sm:h-12 px-3"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
