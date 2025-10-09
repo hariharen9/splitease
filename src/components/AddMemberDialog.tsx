@@ -1,13 +1,12 @@
 
 import React, { useState } from "react";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle,
-} from "@/components/ui/dialog";
+import {
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogDescription,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+} from "@/components/ResponsiveDialog";
 import { 
   AlertDialog, 
   AlertDialogAction, 
@@ -123,7 +122,7 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
   
   return (
     <>
-      <Dialog 
+      <ResponsiveDialog 
         open={open}
         onOpenChange={(isOpen) => {
           if (!isOpen) {
@@ -133,17 +132,17 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
           }
         }}
       >
-        <DialogContent 
+        <ResponsiveDialogContent 
           className="glass-panel border-white/10 sm:max-w-[400px]"
         >
-          <DialogHeader>
-            <DialogTitle>Manage Group Members</DialogTitle>
-            <DialogDescription>
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle>Manage Group Members</ResponsiveDialogTitle>
+            <ResponsiveDialogDescription>
               Add or remove people from your expense group
-            </DialogDescription>
-          </DialogHeader>
+            </ResponsiveDialogDescription>
+          </ResponsiveDialogHeader>
           
-          <div className="space-y-6">
+          <div className="space-y-6 p-4 sm:p-0">
             <div className="space-y-2">
               <div className="text-sm font-medium">Add New Member</div>
               <div className="flex space-x-2">
@@ -215,16 +214,16 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
             </div>
           </div>
           
-          <DialogFooter>
+          <div className="p-4 sm:p-0">
             <Button
               onClick={handleClose}
               className="w-full bg-primary/80 hover:bg-primary transition-colors"
             >
               Done
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
 
       <AlertDialog open={!!memberToDelete} onOpenChange={(open) => !open && setMemberToDelete(null)}>
         <AlertDialogContent>

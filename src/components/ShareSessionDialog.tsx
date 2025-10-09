@@ -1,12 +1,12 @@
 
 import React from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogDescription,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+} from "@/components/ResponsiveDialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -75,14 +75,14 @@ const ShareSessionDialog: React.FC<ShareSessionDialogProps> = ({ open, onOpenCha
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Share Session</DialogTitle>
-          <DialogDescription>
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent className="sm:max-w-md">
+        <ResponsiveDialogHeader>
+          <ResponsiveDialogTitle>Share Session</ResponsiveDialogTitle>
+          <ResponsiveDialogDescription>
             Anyone with this link or QR code can join the session.
-          </DialogDescription>
-        </DialogHeader>
+          </ResponsiveDialogDescription>
+        </ResponsiveDialogHeader>
         <div className="flex flex-col items-center justify-center p-4 space-y-4">
           <QRCodeSVG value={shareUrl} size={160} />
           <div className="flex items-center space-x-2 w-full">
@@ -96,8 +96,8 @@ const ShareSessionDialog: React.FC<ShareSessionDialogProps> = ({ open, onOpenCha
             Share via...
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 };
 
