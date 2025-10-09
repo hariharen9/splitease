@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Session from "./pages/Session";
 import AllSessions from "./pages/AllSessions";
 import NotFound from "./pages/NotFound";
+import JoinSessionPage from "./pages/JoinSessionPage";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
         <AnimatePresence mode="wait">
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/join/:pin" element={<JoinSessionPage />} />
             <Route path="/session/:id" element={<Session />} />
             <Route path="/sessions" element={<AllSessions />} />
             <Route path="*" element={<NotFound />} />

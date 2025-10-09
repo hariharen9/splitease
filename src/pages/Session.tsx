@@ -6,7 +6,7 @@ import {
   Plus,
   ChevronLeft,
   Users,
-  Copy,
+  Share2,
   MoreVertical,
   Pencil,
   Settings,
@@ -38,6 +38,7 @@ import SettlementsView from "@/components/SettlementsView";
 import { subscribeToSession } from "@/lib/firestore";
 import SettingsDialog from "@/components/SettingsDialog";
 import ActivityTab from "@/components/ActivityTab";
+import ShareSessionDialog from "@/components/ShareSessionDialog";
 
 const SessionPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -46,6 +47,7 @@ const SessionPage = () => {
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const [showAddMemberPrompt, setShowAddMemberPrompt] = useState(false);
 
   const [balances, setBalances] = useState<Record<string, number>>({});
@@ -127,7 +129,7 @@ const SessionPage = () => {
     
     // Return a no-op cleanup function if we don't subscribe
     return () => {};
-  }, [sessionId, sessionPin, isFirestoreConnected, syncSessionFromFirestore, navigate, session, getCurrentSession]); // Add getCurrentSession to dependencies
+  }, [sessionId, sessionPin, isFirestoreConnected, syncSessionFromFirestore, navigate]);
 
   // Monitor Firestore connectivity with periodic checks
   useEffect(() => {
@@ -181,43 +183,6 @@ const SessionPage = () => {
     };
   }, [isFirestoreConnected, isFirestoreAvailable, setFirestoreAvailable]);
 
-  const handleCopyPin = () => {
-    // Check if clipboard API is available
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(sessionPin)
-        .then(() => {
-          toast.success("PIN copied to clipboard");
-        })
-        .catch((error) => {
-          console.error("Failed to copy PIN to clipboard:", error);
-          toast.error("Failed to copy PIN to clipboard");
-        });
-    } else {
-      // Fallback for browsers that don't support clipboard API
-      try {
-        const textArea = document.createElement("textarea");
-        textArea.value = sessionPin;
-        textArea.style.position = "fixed";
-        textArea.style.left = "-999999px";
-        textArea.style.top = "-999999px";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        const success = document.execCommand("copy");
-        textArea.remove();
-        
-        if (success) {
-          toast.success("PIN copied to clipboard");
-        } else {
-          toast.error("Failed to copy PIN to clipboard");
-        }
-      } catch (error) {
-        console.error("Failed to copy PIN to clipboard:", error);
-        toast.error("Failed to copy PIN to clipboard");
-      }
-    }
-  };
-  
   const handleEditTitle = () => {
     const newTitle = prompt("Enter new session title", sessionTitle);
     if (newTitle && newTitle.trim() !== "") {
@@ -300,15 +265,7 @@ const SessionPage = () => {
                   )}
                 </div>
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 px-2 py-1 text-muted-foreground hover:text-white flex items-center gap-1.5"
-                    onClick={handleCopyPin}
-                  >
-                    <span className="font-mono">{sessionPin}</span>
-                    <Copy className="h-3.5 w-3.5" />
-                  </Button>
+                  <span className="font-mono">PIN: {sessionPin}</span>
                   <Separator orientation="vertical" className="h-3.5" />
                   <div className="flex items-center gap-1">
                     <Users className="h-3.5 w-3.5" />
@@ -317,34 +274,40 @@ const SessionPage = () => {
                 </div>
               </div>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9">
-                  <MoreVertical className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Session Options</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleEditTitle}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Rename Session
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setShowAddMember(true)}>
-                  <Users className="mr-2 h-4 w-4" />
-                  Manage Members
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setShowSettings(true)}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleBack}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Exit Session
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => setShowShare(true)}>
+                <Share2 className="mr-2 h-4 w-4" />
+                Share
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-9 w-9">
+                    <MoreVertical className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Session Options</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleEditTitle}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Rename Session
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowAddMember(true)}>
+                    <Users className="mr-2 h-4 w-4" />
+                    Manage Members
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowSettings(true)}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleBack}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Exit Session
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
       </header>
@@ -510,6 +473,16 @@ const SessionPage = () => {
             key="settings-dialog"
             open={showSettings}
             onOpenChange={setShowSettings}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showShare && (
+          <ShareSessionDialog
+            key="share-dialog"
+            open={showShare}
+            onOpenChange={setShowShare}
           />
         )}
       </AnimatePresence>
