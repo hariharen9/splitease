@@ -586,7 +586,15 @@ const SessionPage = () => {
                           transition={{ delay: 0.5 + index * 0.1, type: "spring" }}
                           whileHover={{ scale: 1.2, zIndex: 10 }}
                         >
-                          {getInitials(member.name)}
+                          {member.avatarUrl ? (
+                            <img 
+                              src={`${member.avatarUrl}?${member.id}`} 
+                              alt={member.name} 
+                              className="w-full h-full rounded-full object-cover"
+                            />
+                          ) : (
+                            getInitials(member.name)
+                          )}
                         </motion.div>
                       ))}
                     </div>

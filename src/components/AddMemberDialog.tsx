@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Member } from "@/lib/types";
 import { useAppStore } from "@/lib/store/index";
 import { toast } from "sonner";
-import { Trash2, User, UserPlus, AlertTriangle, Users } from "lucide-react";
+import { Trash2, User, UserPlus, AlertTriangle, Users, Circle, CircleCheck } from "lucide-react";
 import { getInitials } from "@/lib/utils";
 import RenameDialog from "@/components/RenameDialog";
 
@@ -41,6 +41,7 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
   onComplete
 }) => {
   const [newMemberName, setNewMemberName] = useState("");
+  const [newMemberGender, setNewMemberGender] = useState<'male' | 'female' | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
   const [memberToRename, setMemberToRename] = useState<Member | null>(null);
@@ -54,11 +55,17 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
       return;
     }
     
+    if (!newMemberGender) {
+      toast.error("Please select a gender for the member");
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
-      addMember(newMemberName.trim());
+      addMember(newMemberName.trim(), newMemberGender);
       setNewMemberName("");
+      setNewMemberGender(undefined);
       toast.success(`${newMemberName.trim()} added to the group`);
     } catch (error) {
       console.error("Error adding member:", error);
@@ -118,6 +125,9 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
   const handleClose = () => {
     onComplete();
     onOpenChange(false);
+    // Reset form fields
+    setNewMemberName("");
+    setNewMemberGender(undefined);
   };
   
   return (
@@ -181,28 +191,66 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                   <UserPlus className="h-4 w-4" />
                   Add New Member
                 </div>
-                <div className="flex space-x-2">
+                <div className="space-y-3">
                   <Input
                     placeholder="Enter name"
                     value={newMemberName}
                     onChange={(e) => setNewMemberName(e.target.value)}
                     className="glass-input"
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
+                      if (e.key === 'Enter' && newMemberName.trim() && newMemberGender) {
                         handleAddMember();
                       }
                     }}
                   />
+                  
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setNewMemberGender('female')}
+                      className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border transition-all ${
+                        newMemberGender === 'female'
+                          ? 'border-pink-500 bg-pink-500/20'
+                          : 'border-gray-300 dark:border-gray-600 hover:bg-white/10'
+                      }`}
+                    >
+                      {newMemberGender === 'female' ? (
+                        <CircleCheck className="h-5 w-5 text-pink-500" />
+                      ) : (
+                        <Circle className="h-5 w-5 text-gray-400" />
+                      )}
+                      <span>Female</span>
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => setNewMemberGender('male')}
+                      className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border transition-all ${
+                        newMemberGender === 'male'
+                          ? 'border-blue-500 bg-blue-500/20'
+                          : 'border-gray-300 dark:border-gray-600 hover:bg-white/10'
+                      }`}
+                    >
+                      {newMemberGender === 'male' ? (
+                        <CircleCheck className="h-5 w-5 text-blue-500" />
+                      ) : (
+                        <Circle className="h-5 w-5 text-gray-400" />
+                      )}
+                      <span>Male</span>
+                    </button>
+                  </div>
+                  
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     <Button
                       onClick={handleAddMember}
-                      disabled={isSubmitting || !newMemberName.trim()}
-                      className="bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-white"
+                      disabled={isSubmitting || !newMemberName.trim() || !newMemberGender}
+                      className="w-full bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-white"
                     >
-                      <UserPlus className="h-4 w-4" />
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Add Member
                     </Button>
                   </motion.div>
                 </div>
@@ -242,14 +290,22 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                           whileTap={{ scale: 0.98 }}
                         >
                           <div className="flex items-center space-x-2">
-                            <motion.div 
-                              className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium text-white"
-                              style={{ backgroundColor: member.avatarColor }}
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                            >
-                              {getInitials(member.name)}
-                            </motion.div>
+                            {member.avatarUrl ? (
+                              <img 
+                                src={`${member.avatarUrl}?${member.id}`} 
+                                alt={member.name} 
+                                className="w-8 h-8 rounded-full object-cover"
+                              />
+                            ) : (
+                              <motion.div 
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium text-white"
+                                style={{ backgroundColor: member.avatarColor }}
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                              >
+                                {getInitials(member.name)}
+                              </motion.div>
+                            )}
                             <span>{member.name}</span>
                           </div>
                           <div className="flex items-center">

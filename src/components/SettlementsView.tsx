@@ -131,7 +131,15 @@ const SettlementsView: React.FC<SettlementsViewProps> = ({
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                         >
-                          {getInitials(fromMember.name)}
+                          {fromMember.avatarUrl ? (
+                            <img 
+                              src={`${fromMember.avatarUrl}?${fromMember.id}`} 
+                              alt={fromMember.name} 
+                              className="w-full h-full rounded-full object-cover"
+                            />
+                          ) : (
+                            getInitials(fromMember.name)
+                          )}
                         </motion.div>
                         <span className="font-medium">{fromMember.name}</span>
                       </motion.div>
@@ -164,7 +172,15 @@ const SettlementsView: React.FC<SettlementsViewProps> = ({
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                         >
-                          {getInitials(toMember.name)}
+                          {toMember.avatarUrl ? (
+                            <img 
+                              src={`${toMember.avatarUrl}?${toMember.id}`} 
+                              alt={toMember.name} 
+                              className="w-full h-full rounded-full object-cover"
+                            />
+                          ) : (
+                            getInitials(toMember.name)
+                          )}
                         </motion.div>
                       </motion.div>
                     </div>

@@ -5,7 +5,7 @@ import * as firestoreService from '../firestore';
 import { SessionSlice } from './sessionSlice';
 
 export interface MemberSlice {
-  addMember: (name: string) => Promise<void>;
+  addMember: (name: string, gender?: 'male' | 'female') => Promise<void>;
   removeMember: (id: string) => Promise<void>;
   updateMember: (id: string, name: string) => Promise<void>;
 }
@@ -16,16 +16,26 @@ export const createMemberSlice: StateCreator<
   [],
   MemberSlice
 > = (set, get) => ({
-  addMember: async (name) => {
+  addMember: async (name, gender) => {
     const currentSessionId = get().currentSessionId;
     const currentPin = get().currentSessionPin;
 
     if (!currentSessionId) return;
 
+    // Generate avatar URL based on gender
+    let avatarUrl: string | undefined;
+    if (gender === 'male') {
+      avatarUrl = 'https://avatar.iran.liara.run/public/boy';
+    } else if (gender === 'female') {
+      avatarUrl = 'https://avatar.iran.liara.run/public/girl';
+    }
+
     const newMember: Member = {
       id: generateId(),
       name,
       avatarColor: `hsl(${Math.floor(Math.random() * 360)}, 70%, 70%)`,
+      gender,
+      avatarUrl
     };
 
     const sessions = get().sessions.map((s) =>

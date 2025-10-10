@@ -91,13 +91,14 @@ const AnalyticsDialog: React.FC<AnalyticsDialogProps> = ({
   
   // Spending per Member
   const spendingPerMember = useMemo(() => {
-    const memberMap: Record<string, { name: string; avatarColor: string; amount: number }> = {};
+    const memberMap: Record<string, { name: string; avatarColor: string; avatarUrl: string; amount: number }> = {};
     
     // Initialize all members with 0 spending
     members.forEach(member => {
       memberMap[member.id] = {
         name: member.name,
         avatarColor: member.avatarColor,
+        avatarUrl: member.avatarUrl,
         amount: 0
       };
     });

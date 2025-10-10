@@ -313,12 +313,20 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
                         <div className="flex items-center gap-2">
                           {paidBy && (
                             <div className="flex items-center gap-1">
-                              <div
-                                className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium text-white"
-                                style={{ backgroundColor: paidBy.avatarColor }}
-                              >
-                                {getInitials(paidBy.name)}
-                              </div>
+                              {paidBy.avatarUrl ? (
+                                <img 
+                                  src={`${paidBy.avatarUrl}?${paidBy.id}`} 
+                                  alt={paidBy.name} 
+                                  className="w-5 h-5 rounded-full object-cover"
+                                />
+                              ) : (
+                                <div
+                                  className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium text-white"
+                                  style={{ backgroundColor: paidBy.avatarColor }}
+                                >
+                                  {getInitials(paidBy.name)}
+                                </div>
+                              )}
                               <span>{paidBy.name}</span>
                             </div>
                           )}

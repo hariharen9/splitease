@@ -471,13 +471,21 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                                       htmlFor={`participant-${member.id}`} 
                                       className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
                                     >
-                                      <div
-                                        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white flex-shrink-0"
-                                        style={{ backgroundColor: member.avatarColor }}
-                                      >
-                                        {member.name.charAt(0)}
-                                      </div>
-                                      <span className="text-sm truncate">{member.name}</span>
+                                      {member.avatarUrl ? (
+                                        <img 
+                                          src={`${member.avatarUrl}?${member.id}`} 
+                                          alt={member.name} 
+                                          className="w-6 h-6 rounded-full object-cover"
+                                        />
+                                      ) : (
+                                        <div
+                                          className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white"
+                                          style={{ backgroundColor: member.avatarColor }}
+                                        >
+                                          {member.name.charAt(0)}
+                                        </div>
+                                      )}
+                                      <span className="truncate">{member.name}</span>
                                     </Label>
                                   </div>
                                 );

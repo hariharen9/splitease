@@ -378,7 +378,15 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                           >
-                            {getInitials(member.name)}
+                            {member.avatarUrl ? (
+                              <img 
+                                src={`${member.avatarUrl}?${member.id}`} 
+                                alt={member.name} 
+                                className="w-full h-full rounded-full object-cover"
+                              />
+                            ) : (
+                              getInitials(member.name)
+                            )}
                           </motion.div>
                         )}
                         <div>
@@ -464,7 +472,15 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
                             >
-                              {getInitials(fromMember.name)}
+                              {fromMember.avatarUrl ? (
+                                <img 
+                                  src={`${fromMember.avatarUrl}?${fromMember.id}`} 
+                                  alt={fromMember.name} 
+                                  className="w-full h-full rounded-full object-cover"
+                                />
+                              ) : (
+                                getInitials(fromMember.name)
+                              )}
                             </motion.div>
                           )}
                           <ArrowRight className="h-4 w-4 text-muted-foreground" />
@@ -475,7 +491,15 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
                             >
-                              {getInitials(toMember.name)}
+                              {toMember.avatarUrl ? (
+                                <img 
+                                  src={`${toMember.avatarUrl}?${toMember.id}`} 
+                                  alt={toMember.name} 
+                                  className="w-full h-full rounded-full object-cover"
+                                />
+                              ) : (
+                                getInitials(toMember.name)
+                              )}
                             </motion.div>
                           )}
                           <div>

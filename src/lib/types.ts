@@ -10,6 +10,8 @@ export interface Member {
   id: string;
   name: string;
   avatarColor: string;
+  gender?: 'male' | 'female'; // Optional for backward compatibility
+  avatarUrl?: string; // Optional for backward compatibility
 }
 
 export interface Expense {

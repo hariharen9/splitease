@@ -368,12 +368,20 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
                               {members.map((member) => (
                                 <SelectItem key={member.id} value={member.id} className="text-sm">
                                   <div className="flex items-center gap-2">
-                                    <div
-                                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white"
-                                      style={{ backgroundColor: member.avatarColor }}
-                                    >
-                                      {member.name.charAt(0)}
-                                    </div>
+                                    {member.avatarUrl ? (
+                                      <img 
+                                        src={`${member.avatarUrl}?${member.id}`} 
+                                        alt={member.name} 
+                                        className="w-6 h-6 rounded-full object-cover"
+                                      />
+                                    ) : (
+                                      <div
+                                        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white flex-shrink-0"
+                                        style={{ backgroundColor: member.avatarColor }}
+                                      >
+                                        {member.name.charAt(0)}
+                                      </div>
+                                    )}
                                     <span className="truncate">{member.name}</span>
                                   </div>
                                 </SelectItem>
@@ -428,12 +436,20 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
                                     htmlFor={`participant-${member.id}`} 
                                     className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
                                   >
-                                    <div
-                                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white flex-shrink-0"
-                                      style={{ backgroundColor: member.avatarColor }}
-                                    >
-                                      {member.name.charAt(0)}
-                                    </div>
+                                    {member.avatarUrl ? (
+                                      <img 
+                                        src={`${member.avatarUrl}?${member.id}`} 
+                                        alt={member.name} 
+                                        className="w-6 h-6 rounded-full object-cover"
+                                      />
+                                    ) : (
+                                      <div
+                                        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white flex-shrink-0"
+                                        style={{ backgroundColor: member.avatarColor }}
+                                      >
+                                        {member.name.charAt(0)}
+                                      </div>
+                                    )}
                                     <span className="text-sm truncate">{member.name}</span>
                                   </Label>
                                 </div>
@@ -666,7 +682,7 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
                 >
                   <Button 
                     type="submit" 
-                    className="w-full bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-sm sm:text-base h-10 sm:h-12"
+                    className="w-full bg-gradient-to-r from-gradient-start to-gradient-end hover:opacity-90 transition-opacity text-sm sm:text-base h-10 sm:h-12 text-white"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
