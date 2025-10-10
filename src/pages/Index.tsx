@@ -198,7 +198,7 @@ const Index = () => {
             >
               <Sparkles className="h-4 w-4 text-blue-400" />
             </motion.div>
-            <span className="text-sm">No Signup Required</span>
+            <span className="text-sm">No Signup Required - Ever!</span>
           </motion.div>
           
           <motion.div 
@@ -241,7 +241,7 @@ const Index = () => {
             >
               <Share2 className="h-4 w-4 text-indigo-400" />
             </motion.div>
-            <span className="text-sm">Share via PIN</span>
+            <span className="text-sm">Easy Join via PIN/QR</span>
           </motion.div>
         </motion.div>
       </motion.div>
