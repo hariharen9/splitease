@@ -301,7 +301,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
               transition={{ delay: 0.4 }}
             >
               <motion.div
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <Button 

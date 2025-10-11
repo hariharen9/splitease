@@ -15,7 +15,8 @@ import {
   DollarSign,
   TrendingUp,
   Zap,
-  Activity
+  Activity,
+  Download
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAppStore } from "@/lib/store/index";
@@ -29,10 +30,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent } from "@/components/ui/card";
 import { Member, Expense, Settlement } from "@/lib/types";
-import { formatCurrency, getInitials, getCurrencySymbol } from "@/lib/utils";
+import { formatCurrency, getInitials, getCurrencySymbol, formatDate } from "@/lib/utils";
 import ExpenseList from "@/components/ExpenseList";
 import AddExpenseDialog from "@/components/AddExpenseDialog";
 import AddMemberDialog from "@/components/AddMemberDialog";
@@ -47,6 +52,44 @@ import RenameDialog from "@/components/RenameDialog";
 import Footer from "@/components/Footer";
 
 import { Skeleton } from "@/components/ui/skeleton";
+
+// Function to convert data to CSV format
+const convertToCSV = (data: any[]): string => {
+  if (!data.length) return "";
+  
+  // Get headers from the first object
+  const headers = Object.keys(data[0]);
+  
+  // Create CSV header row
+  const csvHeader = headers.join(",");
+  
+  // Create CSV data rows
+  const csvRows = data.map(row => {
+    return headers.map(header => {
+      const value = row[header];
+      // Handle values that might contain commas or quotes
+      if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+        return `"${value.replace(/"/g, '""')}"`;
+      }
+      return value;
+    }).join(",");
+  });
+  
+  return [csvHeader, ...csvRows].join("\n");
+};
+
+// Function to download CSV file
+const downloadCSV = (csv: string, filename: string) => {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
 
 const SessionPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -220,6 +263,63 @@ const SessionPage = () => {
   const handleSettingsComplete = useCallback(() => {
     setShowSettings(false);
   }, []);
+
+  // Export functions
+  const handleExportExpenses = () => {
+    if (!session) return;
+    
+    try {
+      // Prepare expense data for export
+      const expensesData = session.expenses.map(expense => {
+        const paidByMember = session.members.find(m => m.id === expense.paidBy);
+        const participants = expense.participants
+          .map(id => session.members.find(m => m.id === id)?.name)
+          .filter(Boolean)
+          .join("; ");
+        
+        return {
+          "Date": formatDate(expense.date),
+          "Title": expense.title,
+          "Amount": expense.amount,
+          "Currency": session.currency,
+          "Paid By": paidByMember?.name || "Unknown",
+          "Participants": participants,
+          "Split Type": expense.split,
+          "Description": expense.description || "",
+          "Category ID": expense.categoryId
+        };
+      });
+      
+      const csv = convertToCSV(expensesData);
+      const filename = `${session.title.replace(/\s+/g, '_')}_expenses_${new Date().toISOString().split('T')[0]}.csv`;
+      downloadCSV(csv, filename);
+      toast.success("Expenses exported successfully");
+    } catch (error) {
+      console.error("Error exporting expenses:", error);
+      toast.error("Failed to export expenses");
+    }
+  };
+
+  const handleExportMembers = () => {
+    if (!session) return;
+    
+    try {
+      // Prepare member data for export
+      const membersData = session.members.map(member => ({
+        "Name": member.name,
+        "ID": member.id,
+        "Avatar Color": member.avatarColor
+      }));
+      
+      const csv = convertToCSV(membersData);
+      const filename = `${session.title.replace(/\s+/g, '_')}_members_${new Date().toISOString().split('T')[0]}.csv`;
+      downloadCSV(csv, filename);
+      toast.success("Members exported successfully");
+    } catch (error) {
+      console.error("Error exporting members:", error);
+      toast.error("Failed to export members");
+    }
+  };
 
   // Calculate total expenses
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
@@ -483,7 +583,7 @@ const SessionPage = () => {
                     </Button>
                   </DropdownMenuTrigger>
                 </motion.div>
-                <DropdownMenuContent align="end" className="backdrop-blur-lg bg-background/80 border-white/10">
+                <DropdownMenuContent align="end" className="backdrop-blur-lg bg-background/80 border-white/10" sideOffset={5}>
                   <DropdownMenuLabel>Session Options</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setShowRename(true)}>
@@ -494,6 +594,30 @@ const SessionPage = () => {
                     <Users className="mr-2 h-4 w-4" />
                     Manage Members
                   </DropdownMenuItem>
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className="flex items-center">
+                      <Download className="mr-2 h-4 w-4" />
+                      Export Data
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                      <DropdownMenuSubContent 
+                        sideOffset={5} 
+                        alignOffset={-5}
+                        collisionPadding={10}
+                        sticky="partial"
+                        className="backdrop-blur-lg bg-background/80 border-white/10 z-[100]"
+                      >
+                        <DropdownMenuItem onClick={handleExportExpenses} className="flex items-center">
+                          <Download className="mr-2 h-4 w-4" />
+                          Export Expenses
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleExportMembers} className="flex items-center">
+                          <Download className="mr-2 h-4 w-4" />
+                          Export Members
+                        </DropdownMenuItem>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                  </DropdownMenuSub>
                   <DropdownMenuItem onClick={() => setShowAnalytics(true)}>
                     <TrendingUp className="mr-2 h-4 w-4" />
                     Analytics
