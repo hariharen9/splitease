@@ -60,7 +60,7 @@ interface EditExpenseDialogProps {
 
 interface FormValues {
   title: string;
-  amount: number;
+  amount: number | undefined;
   paidBy: string;
   participants: string[];
   date: Date;
@@ -86,7 +86,7 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
   const form = useForm<FormValues>({
     defaultValues: {
       title: "",
-      amount: 0,
+      amount: undefined,
       paidBy: members.length > 0 ? members[0].id : "",
       participants: members.map(m => m.id),
       date: new Date(),
@@ -196,7 +196,7 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
     try {
       updateExpense(expense.id, {
         ...data,
-        amount: parseFloat(data.amount.toString()),
+        amount: data.amount || 0, // Handle undefined amount
         date: data.date.toISOString(),
       });
       
@@ -317,7 +317,7 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                           <FormControl>
                             <div className="relative">
                               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                                $
+                                {getCurrencySymbol(currency)}
                               </span>
                               <Input 
                                 type="number"
@@ -325,7 +325,8 @@ const EditExpenseDialog: React.FC<EditExpenseDialogProps> = ({
                                 className="glass-input pl-7" 
                                 placeholder="0.00"
                                 {...field}
-                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                value={field.value || ''}
+                                onChange={(e) => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value) || 0)}
                               />
                             </div>
                           </FormControl>

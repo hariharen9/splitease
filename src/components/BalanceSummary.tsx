@@ -168,10 +168,18 @@ const BalanceSummary: React.FC<BalanceSummaryProps> = ({
   
   // Function to determine who should pay next based on balances
   const getPaymentSuggestion = (members: Member[], balances: Record<string, number>): string => {
-    // If we don't have enough members or balance data, return a default message
-    if (members.length < 2 || Object.keys(balances).length === 0) {
-      const randomMember = members[Math.floor(Math.random() * members.length)];
-      return randomMember ? `${randomMember.name} should pay for the next expense.` : "Add members to get personalized suggestions.";
+    // If we don't have enough members, return a meaningful message
+    if (members.length < 2) {
+      if (members.length === 1) {
+        return "Add more members to start splitting expenses.";
+      }
+      return "Add members to get personalized suggestions.";
+    }
+
+    // If no balances data or all balances are zero, check if there are expenses
+    const hasBalances = Object.keys(balances).length > 0 && Object.values(balances).some(balance => balance !== 0);
+    if (!hasBalances) {
+      return "Add some expenses to get smart suggestions on who should pay next.";
     }
 
     // Find the member who owes the most (most negative balance)

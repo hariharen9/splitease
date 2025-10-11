@@ -49,7 +49,7 @@ interface AddExpenseDialogProps {
 
 interface FormValues {
   title: string;
-  amount: number;
+  amount: number | undefined;
   paidBy: string;
   participants: string[];
   date: Date;
@@ -73,7 +73,7 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
   const form = useForm<FormValues>({
     defaultValues: {
       title: "",
-      amount: 0,
+      amount: undefined,
       paidBy: members.length > 0 ? members[0].id : "",
       participants: members.map(m => m.id),
       date: new Date(),
@@ -169,7 +169,7 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
     try {
       addExpense({
         ...data,
-        amount: parseFloat(data.amount.toString()),
+        amount: data.amount || 0, // Handle undefined amount
         date: data.date.toISOString(),
       });
       
@@ -282,7 +282,8 @@ const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
                               className="glass-input pl-7" 
                               placeholder="0.00"
                               {...field}
-                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value) || 0)}
                             />
                           </div>
                         </FormControl>
